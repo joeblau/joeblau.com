@@ -18,6 +18,43 @@ export const curriculumVitae: CurriculumVitaeSection[] = [
     title: "Investments",
     items: [
       {
+        title: "Phamous",
+        description: "Perpetual futures Decentralized Exchange.",
+        link: "https://phamous.io",
+      },
+      {
+        title: "Safara",
+        description: "Book 1M curated hotels and stays on Safara connected by a cashback rewards program.",
+        link: "https://www.safara.com",
+      },
+
+      {
+        title: "PulseX",
+        description: "Spot Decentralized Exchange.",
+        link: "https://pulsex.com",
+      },
+      {
+        title: "Pacto",
+        description: "Square checkout for latin america.",
+        link: "https://www.pacto.co",
+      },
+      {
+        title: "0xMacro",
+        description: "Defi and Crypto for Smart Contract auditing.",
+        link: "https://0xmacro.com",
+      },
+      {
+        title: "PulseChain",
+        description: "Energy efficient, cheaper, faster, fee-burning Ethereum fork.",
+        link: "https://pulsechain.com",
+      },
+
+      {
+        title: "Hairlooks",
+        description: "Empowering communities of hairstylists and barbers to elevate their craft.",
+        link: "http://www.thehairlooks.com",
+      },
+      {
         title: "Mage.ai",
         description: "A product development collaborative AI application development tool.",
         link: "https://mage.ai",
@@ -28,29 +65,14 @@ export const curriculumVitae: CurriculumVitaeSection[] = [
         link: "https://www.assemble.inc",
       },
       {
-        title: "Safara",
-        description: "Book 1M curated hotels and stays on Safara connected by a cashback rewards program.",
-        link: "https://www.safara.com",
+        title: "Flexport",
+        description: "The freight forwarder for modern logistics teams.",
+        link: "https://www.flexport.com",
       },
       {
         title: "Ethereum",
         description: "World computer.",
         link: "https://ethereum.org",
-      },
-      {
-        title: "PulseChain",
-        description: "Energy efficient, cheaper, faster, fee-burning Ethereum fork.",
-        link: "https://pulsechain.com",
-      },
-      {
-        title: "Hairlooks",
-        description: "Empowering communities of hairstylists and barbers to elevate their craft.",
-        link: "http://www.thehairlooks.com",
-      },
-      {
-        title: "Flexport",
-        description: "The freight forwarder for modern logistics teams.",
-        link: "https://www.flexport.com",
       },
     ],
   },
@@ -85,10 +107,12 @@ export const curriculumVitae: CurriculumVitaeSection[] = [
       {
         title: "FENIX",
         description: "A decentralized finance protocol for the future of money.",
+        link: "https://fenix.fyi",
       },
       {
         title: "Doodle",
         description: "The drawing app where every line tells a story.",
+        link: "https://doodle.app",
       },
       {
         title: "ZenPhones",
