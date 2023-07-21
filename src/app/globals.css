@@ -76,3 +76,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+.blink {
+  animation: blink-animation 1s step-end infinite;
+  -webkit-animation: blink-animation 1s step-end infinite;
+}
+
+@keyframes blink-animation {
+  from,
+  to {
+    color: transparent;
+  }
+  50% {
+    color: var(--nc-tx-2);
+  }
+}
+
+@-webkit-keyframes blink-animation {
+  from,
+  to {
+    color: transparent;
+  }
+  50% {
+    color: var(--nc-tx-2);
+  }
+}
