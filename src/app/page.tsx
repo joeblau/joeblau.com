@@ -13,7 +13,7 @@ export default function Home() {
           <div>
             {curriculumVitae.map((section, index) => (
               <div key={index}>
-                <div>~$ ./blau {section.title}</div>
+                <div>~$ ./blau {section.title.replaceAll(" ", "-")}</div>
                 <div>&nbsp;</div>
                 <ul className="pl-8">
                   {section.items.map((item, index) => (
@@ -21,6 +21,12 @@ export default function Home() {
                       <div className="font-medium inline">
                         {item.link ? <a href={item.link}>{item.title}</a> : <span>{item.title}</span>}
                       </div>
+                      {item.badge && (
+                        <span
+                          title={item.badge.title}
+                          className="font-extralight inline"
+                        >{` [${item.badge.symbol}]`}</span>
+                      )}
                       <span className="font-light inline">{` - ${item.description}`}</span>
                     </li>
                   ))}

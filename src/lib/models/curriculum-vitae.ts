@@ -1,6 +1,13 @@
-enum SectionBadge {
+enum BadgeSymbol {
   exit = "exit",
+  crypto = "₿",
+  angel = "$",
 }
+
+type SectionBadge = {
+  symbol: BadgeSymbol;
+  title: string;
+};
 
 type SectionItem = {
   title: string;
@@ -15,74 +22,163 @@ type CurriculumVitaeSection = {
 
 export const curriculumVitae: CurriculumVitaeSection[] = [
   {
-    title: "Investments",
+    title: "founder",
+    items: [
+      {
+        title: "FENIX",
+        description: "Trustless yield protocol co-founder.",
+        link: "https://fenix.fyi",
+      },
+      {
+        title: "Atomize",
+        description: "Web3 decentralized finance protocol co-founder.",
+      },
+      {
+        title: "Doodle",
+        description: "The drawing app where every line tells a story.",
+        link: "https://doodle.app",
+      },
+      {
+        title: "TeslaAPI",
+        description: "Tesla API documentation.",
+        link: "https://teslaapi.io",
+      },
+      {
+        title: "gitignore.io",
+        description: "Create useful .gitignore files for your project",
+        link: "https://gitignore.io",
+        badge: {
+          symbol: BadgeSymbol.exit,
+          title: "Sold to Toptal",
+        },
+      },
+    ],
+  },
+  {
+    title: "investor",
     items: [
       {
         title: "Phamous",
         description: "Perpetual futures Decentralized Exchange.",
         link: "https://phamous.io",
+        badge: {
+          symbol: BadgeSymbol.crypto,
+          title: "crypto investment",
+        },
+      },
+      {
+        title: "XEN",
+        description: "Token for onboarding the next billion users to crypto.",
+        link: "https://xen.network",
+        badge: {
+          symbol: BadgeSymbol.crypto,
+          title: "crypto investment",
+        },
       },
       {
         title: "Safara",
         description: "Book 1M curated hotels and stays on Safara connected by a cashback rewards program.",
-        link: "https://www.safara.com",
+        link: "https://app.safara.com/referral/Joe-9",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
       },
-
       {
         title: "PulseX",
         description: "Spot Decentralized Exchange.",
         link: "https://pulsex.com",
+        badge: {
+          symbol: BadgeSymbol.crypto,
+          title: "crypto investment",
+        },
       },
       {
         title: "Pacto",
         description: "Square checkout for latin america.",
         link: "https://www.pacto.co",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
       },
       {
         title: "0xMacro",
         description: "Defi and Crypto for Smart Contract auditing.",
         link: "https://0xmacro.com",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
       },
       {
         title: "PulseChain",
         description: "Energy efficient, cheaper, faster, fee-burning Ethereum fork.",
         link: "https://pulsechain.com",
+        badge: {
+          symbol: BadgeSymbol.crypto,
+          title: "crypto investment",
+        },
       },
-
       {
         title: "Hairlooks",
         description: "Empowering communities of hairstylists and barbers to elevate their craft.",
         link: "http://www.thehairlooks.com",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
       },
       {
         title: "Mage.ai",
         description: "A product development collaborative AI application development tool.",
         link: "https://mage.ai",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
       },
       {
         title: "Assemble",
         description: "The future of compensation is data-driven, technology-enabled, and strategic.",
         link: "https://www.assemble.inc",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
+      },
+      {
+        title: "HEX",
+        description: "Blockchain certificate of deposit.",
+        link: "https://hex.com",
+        badge: {
+          symbol: BadgeSymbol.crypto,
+          title: "crypto investment",
+        },
       },
       {
         title: "Flexport",
         description: "The freight forwarder for modern logistics teams.",
         link: "https://www.flexport.com",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
       },
       {
         title: "Ethereum",
         description: "World computer.",
         link: "https://ethereum.org",
+        badge: {
+          symbol: BadgeSymbol.crypto,
+          title: "crypto investment",
+        },
       },
     ],
   },
   {
     title: "Career",
     items: [
-      {
-        title: "Atomize",
-        description: "Web3 decentralized finance protocol co-founder.",
-      },
       {
         title: "Uber",
         description: "Uber Advanced Technology Group Self-Driving engineer.",
@@ -104,16 +200,6 @@ export const curriculumVitae: CurriculumVitaeSection[] = [
   {
     title: "Open Source",
     items: [
-      {
-        title: "FENIX",
-        description: "A decentralized finance protocol for the future of money.",
-        link: "https://fenix.fyi",
-      },
-      {
-        title: "Doodle",
-        description: "The drawing app where every line tells a story.",
-        link: "https://doodle.app",
-      },
       {
         title: "ZenPhones",
         description: "Turn iPhone ear buds into noise-canceling ear buds with phase inversion.",
@@ -148,8 +234,8 @@ export const curriculumVitae: CurriculumVitaeSection[] = [
     title: "Education",
     items: [
       {
-        title: "First Round Capital",
-        description: "Angel Track.",
+        title: "First Round Capital Angel Track",
+        description: "Curriculum, opportunity and community for exceptional emerging angels.",
       },
       {
         title: "Harvard Business School",
@@ -203,6 +289,11 @@ export const curriculumVitae: CurriculumVitaeSection[] = [
         title: "Dribbble",
         description: "Design",
         link: "https://dribbble.com/joeblau",
+      },
+      {
+        title: "Tesla",
+        description: "referral",
+        link: "https://ts.la/joe5702",
       },
     ],
   },
