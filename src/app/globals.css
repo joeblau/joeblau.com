@@ -101,3 +101,13 @@
     color: var(--nc-tx-2);
   }
 }
+
+::selection {
+  background: #00ffc9;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::selection {
+    background: #5c26ff;
+  }
+}
