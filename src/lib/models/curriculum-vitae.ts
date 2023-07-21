@@ -22,6 +22,15 @@ type CurriculumVitaeSection = {
 
 export const curriculumVitae: CurriculumVitaeSection[] = [
   {
+    title: "Who",
+    items: [
+      {
+        title: "Joe Blau",
+        description: "Founder • Investor",
+      },
+    ],
+  },
+  {
     title: "founder",
     items: [
       {

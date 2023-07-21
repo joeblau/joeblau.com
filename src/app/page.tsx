@@ -6,11 +6,6 @@ export default function Home() {
       <div className={"mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-neutral"}>
         <code className="lowercase">
           <div>
-            <h1>Joe Blau</h1>
-            <h2>Founder • Investor</h2>
-            <div>&nbsp;</div>
-          </div>
-          <div>
             {curriculumVitae.map((section, index) => (
               <div key={index}>
                 <div>~$ ./blau {section.title.replaceAll(" ", "-")}</div>
