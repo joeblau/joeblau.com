@@ -67,6 +67,24 @@ export const curriculumVitae: CurriculumVitaeSection[] = [
     title: "investor",
     items: [
       {
+        title: "Alto Crypto IRA",
+        description: "Invest in Crypto Tax-Free",
+        link: "https://www.altoira.com/the-alto-cryptoira/",
+        badge: {
+          symbol: BadgeSymbol.angel,
+          title: "angel investment",
+        },
+      },
+      {
+        title: "DEGEN",
+        description: "Turning content into currency.",
+        link: "https://degen.tips",
+        badge: {
+          symbol: BadgeSymbol.crypto,
+          title: "crypto investment",
+        },
+      },
+      {
         title: "Phamous",
         description: "Perpetual futures Decentralized Exchange.",
         link: "https://phamous.io",
