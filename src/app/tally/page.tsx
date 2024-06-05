@@ -23,7 +23,7 @@ const Hero = () => {
           <div className="pb-4 font-semibold font-mono">Tally Counter List</div>
           <div className="pb-2 flex space-x-4">
             <Button asChild disabled>
-              <Link href="#"> Download On AppStore</Link>
+              <Link href="https://itunes.apple.com/app/id6503914304"> Download On AppStore</Link>
             </Button>
           </div>
           <div className="w-80">
