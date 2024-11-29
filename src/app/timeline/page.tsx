@@ -237,7 +237,7 @@ const TimelineVis = () => {
                     <HoverCard key={periodIndex} open={isMobile ? activeHoverCard === index : undefined} openDelay={0} closeDelay={0}>
                       <HoverCardTrigger asChild>
                         <button
-                          className="absolute h-full bg-[#00ffc9] rounded-2xl"
+                          className="absolute h-full bg-muted-foreground rounded-2xl"
                           style={{
                             width: getBarWidth(period.start, period.end),
                             left: getBarOffset(period.start),
