@@ -10,6 +10,19 @@ import { cn } from "@/lib/utils";
 
 const TimelineVis = () => {
   const years = Array.from({ length: 27 }, (_, i) => 1999 + i);
+  const [activeHoverCard, setActiveHoverCard] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768); // Adjust this breakpoint as needed
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
 
   const data = [
     {
@@ -31,7 +44,7 @@ const TimelineVis = () => {
             "Assemble",
             "Mage.ai",
             "Hairlooks",
-            "Pulsechain",
+            "PulseChain",
             "0xmacro",
             "Pacto",
             "PulseX",
@@ -53,7 +66,7 @@ const TimelineVis = () => {
         {
           start: 2013,
           end: 2025,
-          roles: ["Miner", "Trader", "Investor", "Builder"],
+          roles: ["Mining", "Trading", "Investing", "Building"],
         },
       ],
     },
@@ -79,8 +92,8 @@ const TimelineVis = () => {
     {
         name: "Systems Eng",
         periods: [
-            { start: 2011, end: 2013, roles: ["Hadoop", "Hive", "Pig"]},
-            { start: 2021, end: 2025, roles: ["Vercel", "Cloudflare"]}
+            { start: 2011, end: 2013, roles: ["Attensity", "Timeline Labs"]},
+            { start: 2021, end: 2025, roles: ["Submap", "Superdapp"]}
         ]
     },
     {
@@ -90,7 +103,7 @@ const TimelineVis = () => {
     {
       name: "Web Eng",
       periods: [
-        { start: 2000, end: 2004, roles: ["AIM profiles", "Starcraft Clan Site"] },
+        { start: 2000, end: 2004, roles: ["AIM profiles", "StarCraft Clan Site"] },
         { start: 2008, end: 2011, roles: ["vroomtrap.com"] },
         {
           start: 2022,
@@ -98,6 +111,8 @@ const TimelineVis = () => {
           roles: [
             "tokenlaunch.com",
             "atomize.xyz",
+            "dehi.app",
+            "xen.fyi",
             "fenix.fyi",
             "veblen.co",
             "superdapp.com",
@@ -175,6 +190,16 @@ const TimelineVis = () => {
     return `${((startYear - 1999) / 26) * 100}%`;
   };
 
+  const handleInteraction = (index: number) => {
+    if (isMobile) {
+      if (activeHoverCard === index) {
+        setActiveHoverCard(null);
+      } else {
+        setActiveHoverCard(index);
+      }
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
       <div className="mb-8 overflow-x-auto">
@@ -200,39 +225,42 @@ const TimelineVis = () => {
 
         {/* Timeline rows */}
         <div className="space-y-4">
-          {data.map((row, index) => (
-            <div key={index} className="flex items-center">
+          {data.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex items-center">
               <div className="w-32 pr-4 font-medium text-muted-foreground">
                 {row.name}
               </div>
               <div className="flex-1 h-4 relative bg-secondary rounded-2xl">
-                {row.periods.map((period, periodIndex) => (
-                  <HoverCard key={periodIndex} openDelay={0}>
-                    <HoverCardTrigger asChild>
-                      <a
-                        href="#"
-                        className="absolute h-full bg-green-400 rounded-2xl"
-                        style={{
-                          width: getBarWidth(period.start, period.end),
-                          left: getBarOffset(period.start),
-                        }}
-                      />
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-64">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">{row.name}</p>
-                        <p className="text-sm">{`${period.start} - ${period.end}`}</p>
-                        {period.roles && (
-                          <ul className="text-sm list-disc list-inside">
-                            {period.roles.map((item, i) => (
-                              <li key={i}>{item}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                ))}
+                {row.periods.map((period, periodIndex) => {
+                  const index = rowIndex * 100 + periodIndex;
+                  return (
+                    <HoverCard key={periodIndex} open={isMobile ? activeHoverCard === index : undefined} openDelay={0} closeDelay={0}>
+                      <HoverCardTrigger asChild>
+                        <button
+                          className="absolute h-full bg-green-400 rounded-2xl"
+                          style={{
+                            width: getBarWidth(period.start, period.end),
+                            left: getBarOffset(period.start),
+                          }}
+                          onClick={() => handleInteraction(index)}
+                        />
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-64">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">{row.name}</p>
+                          <p className="text-sm">{`${period.start} - ${period.end}`}</p>
+                          {period.roles && (
+                            <ul className="text-sm list-disc list-inside">
+                              {period.roles.map((item, i) => (
+                                <li key={i}>{item}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  );
+                })}
               </div>
             </div>
           ))}
