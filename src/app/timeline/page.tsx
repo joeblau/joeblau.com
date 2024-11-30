@@ -97,10 +97,6 @@ const TimelineVis = () => {
         ]
     },
     {
-        name: "Security Eng",
-        periods: [{ start: 2004, end: 2011, roles: ["BBN", "SAIC"] }],
-      },
-    {
       name: "Web Eng",
       periods: [
         { start: 2000, end: 2004, roles: ["AIM profiles", "StarCraft Clan Site"] },
@@ -119,7 +115,7 @@ const TimelineVis = () => {
           ],
         },
       ],
-    },
+    },    
     {
       name: "AI",
       periods: [
@@ -132,9 +128,18 @@ const TimelineVis = () => {
     },
     {
       name: "Open Source",
-      periods: [{ start: 2011, end: 2018, roles: ["gitignore.io", "Touch Visualizer"] }],
+      periods: [{ start: 2011, end: 2019, roles: ["gitignore.io", "Touch Visualizer"] }],
     },
-
+    {
+      name: "Graduate",
+      periods: [
+        { start: 2017, end: 2019, roles: ["Harvard Business School - MBA"] },
+      ],
+    },
+    {
+      name: "Security Eng",
+      periods: [{ start: 2004, end: 2011, roles: ["BBN", "SAIC"] }],
+    },
     {
       name: "Sales",
       periods: [
@@ -156,12 +161,6 @@ const TimelineVis = () => {
           end: 2003,
           roles: ["Pizza Hut", "Chick-fil-A", "Cinnabon"],
         },
-      ],
-    },
-    {
-      name: "Graduate",
-      periods: [
-        { start: 2017, end: 2019, roles: ["Harvard Business School - MBA"] },
       ],
     },
     {
