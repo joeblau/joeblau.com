@@ -98,7 +98,7 @@ const TimelineVis = () => {
     },
     {
         name: "Security Eng",
-        periods: [{ start: 2003, end: 2009, roles: ["BBN", "SAIC"] }],
+        periods: [{ start: 2004, end: 2011, roles: ["BBN", "SAIC"] }],
       },
     {
       name: "Web Eng",
