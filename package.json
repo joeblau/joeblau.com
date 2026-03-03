@@ -1,0 +1,13 @@
+{
+  "name": "joeblau.com",
+  "private": true,
+  "workspaces": ["workers/*", "packages/*"],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2"
+  }
+}
