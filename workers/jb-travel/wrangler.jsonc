@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "www",
+	"name": "jb-travel",
 	"main": ".open-next/worker.js",
 	"account_id": "2b04333c55d653550f69d1c732b92d98",
 	"compatibility_date": "2025-12-01",
@@ -18,7 +18,7 @@
 	"services": [
 		{
 			"binding": "WORKER_SELF_REFERENCE",
-			"service": "www"
+			"service": "jb-travel"
 		}
 	],
 	"observability": {
