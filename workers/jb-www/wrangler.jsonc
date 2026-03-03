@@ -23,5 +23,11 @@
 	],
 	"observability": {
 		"enabled": true
-	}
+	},
+	"routes": [
+		{
+			"pattern": "joeblau.com",
+			"custom_domain": true
+		}
+	]
 }
