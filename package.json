@@ -1,34 +1,13 @@
 {
-  "name": "joeblaucom",
-  "version": "0.1.0",
+  "name": "joeblau.com",
   "private": true,
+  "workspaces": ["workers/*", "packages/*"],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint"
   },
-  "dependencies": {
-    "@radix-ui/react-hover-card": "^1.1.2",
-    "@radix-ui/react-slot": "^1.0.2",
-    "@radix-ui/react-tooltip": "^1.1.4",
-    "@types/node": "20.4.2",
-    "@types/react": "18.2.15",
-    "@types/react-dom": "18.2.7",
-    "autoprefixer": "10.4.14",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "eslint": "8.45.0",
-    "eslint-config-next": "^15.0.3",
-    "lucide-react": "^0.462.0",
-    "next": "^15.0.3",
-    "next-themes": "^0.4.3",
-    "postcss": "8.4.26",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.5.5",
-    "tailwindcss": "3.3.3",
-    "tailwindcss-animate": "^1.0.7",
-    "typescript": "5.1.6"
+  "devDependencies": {
+    "turbo": "^2"
   }
 }
