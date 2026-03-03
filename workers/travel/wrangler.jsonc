@@ -1,0 +1,27 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "travel",
+	"main": ".open-next/worker.js",
+	"account_id": "2b04333c55d653550f69d1c732b92d98",
+	"compatibility_date": "2025-12-01",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".open-next/assets"
+	},
+	"images": {
+		"binding": "IMAGES"
+	},
+	"services": [
+		{
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "travel"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}
