@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cf-build": "opennextjs-cloudflare build",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
   },
   "dependencies": {
     "@radix-ui/react-hover-card": "^1.1.2",
@@ -30,5 +33,9 @@
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.1.6"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.14.4",
+    "wrangler": "^4.54.0"
   }
 }
