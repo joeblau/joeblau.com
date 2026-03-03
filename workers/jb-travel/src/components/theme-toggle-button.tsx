@@ -51,12 +51,12 @@ export function ThemeToggleButton({
 
 	const toggleTheme = async () => {
 		// Check if View Transition API is supported
-		if (!document.startViewTransition) {
+		if (!(document as any).startViewTransition) {
 			setTheme(isDark ? "light" : "dark");
 			return;
 		}
 
-		const transition = document.startViewTransition(async () => {
+		const transition = (document as any).startViewTransition(async () => {
 			setTheme(isDark ? "light" : "dark");
 		});
 
@@ -150,12 +150,12 @@ export function useThemeToggle({
 	};
 
 	const toggleTheme = async () => {
-		if (!document.startViewTransition) {
+		if (!(document as any).startViewTransition) {
 			setTheme(isDark ? "light" : "dark");
 			return;
 		}
 
-		const transition = document.startViewTransition(async () => {
+		const transition = (document as any).startViewTransition(async () => {
 			setTheme(isDark ? "light" : "dark");
 		});
 
