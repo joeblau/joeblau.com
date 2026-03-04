@@ -28,4 +28,3 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: workers/${{ matrix.worker }}
-          command: deploy --no-build
