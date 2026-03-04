@@ -1,54 +1,44 @@
 {
-  "name": "@joeblau/www",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "cf-build": "opennextjs-cloudflare build",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
-  },
-  "dependencies": {
+	"name": "@joeblau/www",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "bun@1.3.0",
+	"scripts": {
+		"dev": "next dev --turbopack",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"cf-build": "opennextjs-cloudflare build",
+		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+		"upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+		"preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
+	},
+	"dependencies": {
 		"@opennextjs/cloudflare": "^1.14.4",
-    "@radix-ui/react-hover-card": "^1.1.2",
-    "@radix-ui/react-slot": "^1.0.2",
-    "@radix-ui/react-tooltip": "^1.1.4",
-    "@types/node": "20.4.2",
-    "@types/react": "18.2.15",
-    "@types/react-dom": "18.2.7",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "eslint": "8.45.0",
-    "eslint-config-next": "^15.0.3",
-    "lucide-react": "^0.462.0",
-    "next": "^15.0.3",
-    "next-themes": "^0.4.3",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
-    "tailwind-merge": "^2.5.5",
-    "typescript": "5.1.6"
-  },
-  "devDependencies": {
+		"@radix-ui/react-hover-card": "^1.1.2",
+		"@radix-ui/react-slot": "^1.2.4",
+		"@radix-ui/react-tooltip": "^1.2.8",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"lucide-react": "^0.562.0",
+		"next": "15.5.9",
+		"next-themes": "^0.4.6",
+		"react": "19.1.4",
+		"react-dom": "19.1.4",
+		"tailwind-merge": "^3.4.0"
+	},
+	"devDependencies": {
 		"@eslint/eslintrc": "^3",
 		"@tailwindcss/postcss": "^4",
 		"@tailwindcss/typography": "^0.5.19",
-		"@types/mapbox-gl": "^3.4.1",
 		"@types/node": "^25.0.3",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
-		"@types/react-simple-maps": "^3.0.6",
-		"@types/suncalc": "^1.9.2",
-		"@types/tz-lookup": "^6.1.2",
 		"eslint": "^9",
 		"eslint-config-next": "15.4.6",
-		"ignore-loader": "^0.1.2",
-		"raw-loader": "^4.0.2",
 		"tailwindcss": "^4",
 		"tw-animate-css": "^1.4.0",
 		"typescript": "^5",
 		"wrangler": "^4.54.0"
-  }
+	}
 }
