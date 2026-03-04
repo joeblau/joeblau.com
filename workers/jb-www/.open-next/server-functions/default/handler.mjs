@@ -1,1 +1,0 @@
-export { handler } from "./workers/jb-www/handler.mjs";
