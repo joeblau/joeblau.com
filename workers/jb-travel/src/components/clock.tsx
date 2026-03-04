@@ -50,7 +50,7 @@ export default function Clock({ longitude, latitude }: ClockProps) {
 				onClick={() => setShowDebug(!showDebug)}
 				title="Click to toggle debug info"
 			>
-				<svg width="64" height="64" viewBox="0 0 64 64" className="transform -rotate-90">
+				<svg width="64" height="64" viewBox="0 0 64 64">
 				<circle cx="32" cy="32" r="30" fill="none" className="stroke-border" strokeWidth="1" />
 
 				<line
