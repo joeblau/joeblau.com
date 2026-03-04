@@ -18,7 +18,6 @@
 	},
 	"dependencies": {
 		"@ant-design/icons": "6.x",
-		"@cloudflare/next-on-pages": "^1.13.16",
 		"@cloudflare/puppeteer": "^1.0.4",
 		"@dnd-kit/core": "^6.3.1",
 		"@dnd-kit/modifiers": "^9.0.0",
