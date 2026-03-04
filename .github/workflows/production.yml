@@ -28,3 +28,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: workers/${{ matrix.worker }}
+        env:
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ matrix.worker == 'jb-travel' && secrets.NEXT_PUBLIC_MAPBOX_TOKEN || '' }}
