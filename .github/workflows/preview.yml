@@ -23,6 +23,7 @@ jobs:
       - name: Deploy preview
         uses: cloudflare/wrangler-action@v3
         with:
+          packageManager: bun
           preCommands: bun run cf-build
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
