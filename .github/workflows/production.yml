@@ -20,12 +20,10 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build
-        run: bun run --cwd workers/${{ matrix.worker }} cf-build
-
       - name: Deploy production
         uses: cloudflare/wrangler-action@v3
         with:
+          preCommands: bun run cf-build
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: workers/${{ matrix.worker }}
