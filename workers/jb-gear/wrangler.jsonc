@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "jb-www",
+	"name": "jb-gear",
 	"main": ".open-next/worker.js",
 	"account_id": "2b04333c55d653550f69d1c732b92d98",
 	"compatibility_date": "2025-12-01",
@@ -18,19 +18,19 @@
 	"services": [
 		{
 			"binding": "WORKER_SELF_REFERENCE",
-			"service": "jb-www"
+			"service": "jb-gear"
 		}
 	],
 	"dev": {
-		"port": 6000,
-		"inspector_port": 6500
+		"port": 6002,
+		"inspector_port": 6502
 	},
 	"observability": {
 		"enabled": true
 	},
 	"routes": [
 		{
-			"pattern": "joeblau.com",
+			"pattern": "gear.jovla.com",
 			"custom_domain": true
 		}
 	]

@@ -21,6 +21,10 @@
 			"service": "jb-travel"
 		}
 	],
+	"dev": {
+		"port": 6001,
+		"inspector_port": 6501
+	},
 	"observability": {
 		"enabled": true
 	},
