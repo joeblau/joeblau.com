@@ -142,13 +142,29 @@ export const gearItems: GearItem[] = [
     url: "https://www.apple.com/macbook-pro/",
     description: '16" laptop with M3 Max chip',
   },
+  {
+    name: "iPad Pro 13-inch M4",
+    category: Category.Computing,
+    price: 1299,
+    image: "/gear/ipad-pro-m4.png",
+    url: "https://www.apple.com/ipad-pro/",
+    description: "13-inch Ultra Retina XDR display (Silver)",
+  },
+  {
+    name: "Magic Keyboard for iPad Pro",
+    category: Category.Computing,
+    price: 349,
+    image: "/gear/magic-keyboard-ipad.png",
+    url: "https://www.apple.com/shop/product/MWR43LL/A/magic-keyboard-for-ipad-pro-13-inch-m4",
+    description: "iPad Pro keyboard with trackpad (White)",
+  },
   // Accessories
   {
     name: "Ergotron HX Dual Monitor Arm",
     category: Category.Accessories,
     price: 649,
     image: "/gear/ergotron-hx.png",
-    url: "https://www.ergotron.com/en-us/products/product-details/45-476-224",
+    url: "https://www.ergotron.com/en-us/products/product-details/45-476-216",
     description: "Heavy-duty dual monitor mount",
   },
   {
@@ -182,14 +198,6 @@ export const gearItems: GearItem[] = [
     image: "/gear/elgato-keylight.png",
     url: "https://www.elgato.com/us/en/p/key-light",
     description: "Professional studio light",
-  },
-  {
-    name: "Nomad Stand One Max",
-    category: Category.Accessories,
-    price: 150,
-    image: "/gear/nomad-stand-one.png",
-    url: "https://nomadgoods.com/products/stand-one-max-3-in-1-carbide",
-    description: "3-in-1 MagSafe charger",
   },
 ];
 
