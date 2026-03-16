@@ -100,13 +100,13 @@ export const gearItems: GearItem[] = [
     url: "https://www.lewitt-audio.com/connect-6",
     description: "USB-C audio interface",
   },
-  {
-    name: "Beyerdynamic DT 1990 Pro",
+{
+    name: "Drop x Beyerdynamic DT 177X GO",
     category: Category.Audio,
-    price: 599,
-    image: "/gear/beyerdynamic-dt1990.png",
-    url: "https://www.beyerdynamic.com/dt-1990-pro.html",
-    description: "Open-back studio headphones",
+    price: 349,
+    image: "/gear/beyerdynamic-dt177x.png",
+    url: "https://drop.com/buy/massdrop-x-beyerdynamic-dt177x-go-headphones",
+    description: "Closed-back portable headphones",
   },
   // Desk
   {
