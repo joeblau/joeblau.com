@@ -36,7 +36,7 @@ export const gearItems: GearItem[] = [
   },
   // Camera
   {
-    name: "ZEISS Supreme Prime CP.3 25mm",
+    name: "ZEISS Supreme Prime CP.3 35mm",
     category: Category.Camera,
     price: 4990,
     image: "/gear/zeiss-cp3.png",
