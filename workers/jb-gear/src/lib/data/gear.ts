@@ -135,6 +135,14 @@ export const gearItems: GearItem[] = [
   },
   // Computing
   {
+    name: "MacBook Air M2",
+    category: Category.Computing,
+    price: 1099,
+    image: "/gear/macbook-air-m2.png",
+    url: "https://www.apple.com/macbook-air-m2/",
+    description: '13" laptop with M2 chip (Midnight)',
+  },
+  {
     name: "MacBook Pro M3 Max",
     category: Category.Computing,
     price: 3499,
