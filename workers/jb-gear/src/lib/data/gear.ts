@@ -53,22 +53,6 @@ export const gearItems: GearItem[] = [
   },
   // Audio
   {
-    name: "Schoeps CMC 1 L",
-    category: Category.Audio,
-    price: 1870,
-    image: "/gear/schoeps-cmc1.png",
-    url: "https://schoeps.de/en/products/colette/cmc-1.html",
-    description: "Modular condenser microphone amplifier",
-  },
-  {
-    name: "Schoeps MK 4",
-    category: Category.Audio,
-    price: 1310,
-    image: "/gear/schoeps-mk4.png",
-    url: "https://schoeps.de/en/products/colette/mk-4.html",
-    description: "Cardioid capsule",
-  },
-  {
     name: "Schoeps V4 U",
     category: Category.Audio,
     price: 2850,
