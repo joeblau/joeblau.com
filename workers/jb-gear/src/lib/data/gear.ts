@@ -199,6 +199,14 @@ export const gearItems: GearItem[] = [
     description: "Slim wireless battery pack",
   },
   {
+    name: "iPhone Air MagSafe Battery",
+    category: Category.Accessories,
+    price: 99,
+    image: "/gear/magsafe-battery.png",
+    url: "https://www.apple.com/shop/product/mgpg4am/a/iphone-air-magsafe-battery",
+    description: "Slim wireless battery pack",
+  },
+  {
     name: "Roost V3+",
     category: Category.Desk,
     price: 99,
