@@ -118,12 +118,12 @@ export const gearItems: GearItem[] = [
     description: "Standing desk frame",
   },
   {
-    name: "Deskhaus Butcher Block Surface",
+    name: "Deskhaus HPL Surface",
     category: Category.Desk,
     price: 399,
     image: "/gear/deskhaus-surface.png",
-    url: "https://desk.haus/",
-    description: "Solid wood desktop surface",
+    url: "https://desk.haus/products/high-pressure-laminate-surface",
+    description: "High pressure laminate desktop (Brite White)",
   },
   {
     name: "Deskhaus Wire Snake",
@@ -173,6 +173,14 @@ export const gearItems: GearItem[] = [
     image: "/gear/iphone-17-pro.png",
     url: "https://www.apple.com/iphone-17-pro/",
     description: '6.3" Pro smartphone (Deep Blue)',
+  },
+  {
+    name: "Nomad Stand One",
+    category: Category.Accessories,
+    price: 119,
+    image: "/gear/nomad-stand-one.png",
+    url: "https://nomadgoods.com/products/stand-one-4th-gen-silver",
+    description: "Qi2.2 wireless charging stand (Silver)",
   },
   {
     name: "iPhone Air MagSafe Battery",
