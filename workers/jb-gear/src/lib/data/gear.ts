@@ -69,6 +69,22 @@ export const gearItems: GearItem[] = [
     description: "Cardioid capsule",
   },
   {
+    name: "Schoeps V4 U",
+    category: Category.Audio,
+    price: 2850,
+    image: "/gear/schoeps-v4u.png",
+    url: "https://schoeps.de/en/products/v4/v4.html",
+    description: "Studio vocal microphone (Gray)",
+  },
+  {
+    name: "Schoeps MiniCMIT",
+    category: Category.Audio,
+    price: 2149,
+    image: "/gear/schoeps-minicmit.png",
+    url: "https://schoeps.de/en/products/shotgun-microphones/cmit-series/minicmit.html",
+    description: "Miniature shotgun microphone (Blue)",
+  },
+  {
     name: "Apple HomePod",
     category: Category.Audio,
     price: 299,
@@ -93,12 +109,12 @@ export const gearItems: GearItem[] = [
     description: "Premium microphone arm",
   },
   {
-    name: "Lewitt LCT 240 PRO",
+    name: "Lewitt CONNECT 6",
     category: Category.Audio,
     price: 269,
-    image: "/gear/lewitt-lct240.png",
-    url: "https://www.lewitt-audio.com/microphones/lct-240-pro",
-    description: "Studio condenser microphone",
+    image: "/gear/lewitt-connect6.png",
+    url: "https://www.lewitt-audio.com/connect-6",
+    description: "USB-C audio interface",
   },
   {
     name: "Beyerdynamic DT 1990 Pro",
@@ -156,7 +172,7 @@ export const gearItems: GearItem[] = [
     category: Category.Accessories,
     price: 199,
     image: "/gear/stream-deck-plus.png",
-    url: "https://www.elgato.com/us/en/p/stream-deck-plus-black",
+    url: "https://www.elgato.com/us/en/p/stream-deck-plus-white",
     description: "Customizable LCD control panel",
   },
   {
