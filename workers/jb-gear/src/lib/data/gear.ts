@@ -114,7 +114,7 @@ export const gearItems: GearItem[] = [
     category: Category.Desk,
     price: 899,
     image: "/gear/deskhaus-frame.png",
-    url: "https://desk.haus/products/apex-pro",
+    url: "https://desk.haus/products/apex-pro-2?variant=39436448661653",
     description: "Standing desk frame",
   },
   {
