@@ -133,6 +133,14 @@ export const gearItems: GearItem[] = [
     url: "https://desk.haus/",
     description: "Cable management spine",
   },
+  {
+    name: "HÅG Capisco 8106",
+    category: Category.Desk,
+    price: 1599,
+    image: "/gear/hag-capisco-8106.jpg",
+    url: "https://hag-office.com/products/capisco-8106",
+    description: "Ergonomic saddle chair (White)",
+  },
   // Computing
   {
     name: "MacBook Air M2",
