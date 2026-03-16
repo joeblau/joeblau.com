@@ -159,6 +159,22 @@ export const gearItems: GearItem[] = [
     description: "iPad Pro keyboard with trackpad (White)",
   },
   {
+    name: "iPhone Air",
+    category: Category.Computing,
+    price: 799,
+    image: "/gear/iphone-air.png",
+    url: "https://www.apple.com/iphone-air/",
+    description: "Ultralight smartphone (Cloud White)",
+  },
+  {
+    name: "iPhone 17 Pro",
+    category: Category.Computing,
+    price: 1199,
+    image: "/gear/iphone-17-pro.png",
+    url: "https://www.apple.com/iphone-17-pro/",
+    description: '6.3" Pro smartphone (Deep Blue)',
+  },
+  {
     name: "Roost V3+",
     category: Category.Desk,
     price: 99,
