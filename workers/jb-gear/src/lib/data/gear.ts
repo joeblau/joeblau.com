@@ -175,6 +175,14 @@ export const gearItems: GearItem[] = [
     description: '6.3" Pro smartphone (Deep Blue)',
   },
   {
+    name: "iPhone Air MagSafe Battery",
+    category: Category.Accessories,
+    price: 99,
+    image: "/gear/magsafe-battery.png",
+    url: "https://www.apple.com/shop/product/mgpg4am/a/iphone-air-magsafe-battery",
+    description: "Slim wireless battery pack",
+  },
+  {
     name: "Roost V3+",
     category: Category.Desk,
     price: 99,
@@ -189,6 +197,22 @@ export const gearItems: GearItem[] = [
     image: "/gear/roost-v3-plus.png",
     url: "https://www.therooststand.com/products/roost-v3-plus-laptop-stand",
     description: "Portable laptop stand (Dune)",
+  },
+  {
+    name: "Magic Keyboard",
+    category: Category.Computing,
+    price: 99,
+    image: "/gear/magic-keyboard.png",
+    url: "https://www.apple.com/shop/product/mxcl3ll/a/magic-keyboard-usb-c-us-english",
+    description: "Wireless keyboard with USB-C (White)",
+  },
+  {
+    name: "Magic Trackpad",
+    category: Category.Computing,
+    price: 129,
+    image: "/gear/magic-trackpad.png",
+    url: "https://www.apple.com/shop/product/mxk93am/a/magic-trackpad-usb-c-white-multi-touch-surface",
+    description: "Wireless trackpad with Force Touch (White)",
   },
   // Accessories
   {
