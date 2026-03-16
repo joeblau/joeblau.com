@@ -40,7 +40,7 @@ export const gearItems: GearItem[] = [
     category: Category.Camera,
     price: 4990,
     image: "/gear/zeiss-cp3.png",
-    url: "https://www.zeiss.com/consumer-products/us/cinematography/cp3.html",
+    url: "https://www.zeiss.com/photonics-and-optics/en/cinematography/lenses/compact-prime-cp-3-lenses.html#footage",
     description: "T2.1 Cinema lens",
   },
   {
@@ -64,7 +64,7 @@ export const gearItems: GearItem[] = [
     name: "Schoeps MiniCMIT",
     category: Category.Audio,
     price: 2149,
-    image: "/gear/schoeps-minicmit.png",
+    image: "/gear/schoeps-minicmit.jpg",
     url: "https://schoeps.de/en/products/shotgun-microphones/cmit-series/minicmit.html",
     description: "Miniature shotgun microphone (Blue)",
   },
