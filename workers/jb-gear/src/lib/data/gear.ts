@@ -49,7 +49,7 @@ export const gearItems: GearItem[] = [
     price: 2198,
     image: "/gear/sony-zv-e1.png",
     url: "https://www.sony.com/en/interchangeable-lens-cameras/products/ilce-zve1",
-    description: "Full-frame vlog camera",
+    description: "Full-frame vlog camera (White)",
   },
   // Audio
   {
@@ -140,7 +140,7 @@ export const gearItems: GearItem[] = [
     price: 3499,
     image: "/gear/macbook-pro-m3.png",
     url: "https://www.apple.com/macbook-pro/",
-    description: '16" laptop with M3 Max chip',
+    description: '14" laptop with M3 Max chip (Silver)',
   },
   {
     name: "iPad Pro 13-inch M4",
@@ -158,6 +158,22 @@ export const gearItems: GearItem[] = [
     url: "https://www.apple.com/shop/product/MWR43LL/A/magic-keyboard-for-ipad-pro-13-inch-m4",
     description: "iPad Pro keyboard with trackpad (White)",
   },
+  {
+    name: "Roost V3+",
+    category: Category.Desk,
+    price: 99,
+    image: "/gear/roost-v3-plus.png",
+    url: "https://www.therooststand.com/products/roost-v3-plus-laptop-stand",
+    description: "Portable laptop stand (Dune)",
+  },
+  {
+    name: "Roost V3+",
+    category: Category.Desk,
+    price: 99,
+    image: "/gear/roost-v3-plus.png",
+    url: "https://www.therooststand.com/products/roost-v3-plus-laptop-stand",
+    description: "Portable laptop stand (Dune)",
+  },
   // Accessories
   {
     name: "Ergotron HX Dual Monitor Arm",
@@ -171,17 +187,17 @@ export const gearItems: GearItem[] = [
     name: "Elgato Stream Deck +",
     category: Category.Accessories,
     price: 199,
-    image: "/gear/stream-deck-plus.png",
+    image: "/gear/stream-deck-white.png",
     url: "https://www.elgato.com/us/en/p/stream-deck-plus-white",
     description: "Customizable LCD control panel",
   },
   {
-    name: "Brydge SP Max+",
+    name: "Brydge ProDock",
     category: Category.Accessories,
-    price: 399,
-    image: "/gear/brydge-sp-max.png",
-    url: "https://www.brydge.com/products/brydge-sp-max-plus",
-    description: "Thunderbolt docking station",
+    price: 400,
+    image: "/gear/brydge-prodock.png",
+    url: "https://www.brydge.com/prodock",
+    description: "Thunderbolt 4 vertical docking station",
   },
   {
     name: "Elgato Key Light",
