@@ -30,7 +30,7 @@
 	},
 	"routes": [
 		{
-			"pattern": "gear.jovla.com",
+			"pattern": "gear.joeblau.com",
 			"custom_domain": true
 		}
 	]
