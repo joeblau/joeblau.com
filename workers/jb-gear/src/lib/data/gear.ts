@@ -64,7 +64,7 @@ export const gearItems: GearItem[] = [
     name: "Schoeps MiniCMIT",
     category: Category.Audio,
     price: 2149,
-    image: "/gear/schoeps-minicmit.jpg",
+    image: "/gear/schoeps-minicmit.png",
     url: "https://schoeps.de/en/products/shotgun-microphones/cmit-series/minicmit.html",
     description: "Miniature shotgun microphone (Blue)",
   },
