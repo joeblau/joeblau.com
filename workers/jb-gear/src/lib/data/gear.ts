@@ -175,6 +175,14 @@ export const gearItems: GearItem[] = [
     description: "iPad Pro keyboard with trackpad (White)",
   },
   {
+    name: "Apple Pencil Pro",
+    category: Category.Computing,
+    price: 129,
+    image: "/gear/apple-pencil-pro.png",
+    url: "https://www.apple.com/apple-pencil/",
+    description: "Precision stylus with haptic feedback",
+  },
+  {
     name: "iPhone Air",
     category: Category.Computing,
     price: 799,
