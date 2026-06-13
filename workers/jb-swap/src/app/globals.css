@@ -4,6 +4,10 @@
 
 @layer base {
   :root {
+    /* Easings used by the skiper26 theme-toggle view transitions */
+    --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --expo-in: cubic-bezier(0.7, 0, 0.84, 0);
+
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
 
