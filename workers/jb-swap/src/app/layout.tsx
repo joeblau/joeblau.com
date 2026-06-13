@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
 	title: "Swap — Joe Blau",
@@ -25,6 +26,7 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+					<SiteHeader />
 					{children}
 				</ThemeProvider>
 			</body>

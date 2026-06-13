@@ -22,8 +22,8 @@
 		}
 	],
 	"dev": {
-		"port": 6002,
-		"inspector_port": 6502
+		"port": 33002,
+		"inspector_port": 33502
 	},
 	"observability": {
 		"enabled": true
