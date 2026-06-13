@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { Nunito } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SiteHeader } from "@/components/site-header";
+
+const nunito = Nunito({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
 	title: "Swap — Joe Blau",
@@ -24,7 +25,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
+			<body className={`${nunito.className} antialiased`}>
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 					<SiteHeader />
 					{children}
