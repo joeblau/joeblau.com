@@ -242,7 +242,7 @@ export function SwapCard() {
 					triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4 hover:bg-foreground/[0.03]"
 				/>
 				<div className="-mx-4 border-t-2 border-background" />
-				<div className="flex flex-col items-center gap-4 pt-4">
+				<div className="flex flex-col items-center gap-2 p-2">
 					<AmountInput
 						value={fromAmount}
 						prefix={fromMode === "usd" ? "$" : undefined}
@@ -258,7 +258,7 @@ export function SwapCard() {
 			</section>
 
 			{/* Swap direction */}
-			<div className="relative z-10 mx-auto -my-2 flex w-fit">
+			<div className="relative z-10 mx-auto -my-3 flex w-fit">
 				<HapticButton
 					type="button"
 					style={{
@@ -282,7 +282,7 @@ export function SwapCard() {
 					triggerClassName="-mx-4 -mt-6 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-6 hover:bg-foreground/[0.03]"
 				/>
 				<div className="-mx-4 border-t-2 border-background" />
-				<div className="flex flex-col items-center gap-4 pt-4">
+				<div className="flex flex-col items-center gap-2 p-2">
 					<AmountInput
 						value={trim(toMode === "token" ? toAmount : toUsd)}
 						prefix={toMode === "usd" ? "$" : undefined}
