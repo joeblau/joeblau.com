@@ -1,20 +1,23 @@
 "use client";
 
 import Avatar from "boring-avatars";
-import { FlaskConical, Lock, Search, X } from "lucide-react";
+import { FlaskConical, Lock, Scan, Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { Drawer } from "vaul";
 
 import { cn } from "@/lib/utils";
 
 /**
- * Stateful "From" token selector. Before a token is picked it shows a
- * "From..." placeholder; picking a token swaps it for a stacked icon
- * (Boring Avatar + chain + asset) alongside the address / chain / name,
- * plus Test/Max and holdings. Static data — no real search or balances.
- * Asset and chain icons come from Relay's icon CDN; the address avatar
- * is generated with boring-avatars.
+ * Stateful token selector used for both the "From" and "To" sides. Before a
+ * token is picked it shows a "From..." / "To..." placeholder; picking a token
+ * swaps in a stacked icon (Boring Avatar + chain + asset) with the address /
+ * chain / name plus side-specific meta (Test/Max + holdings for From,
+ * Slippage/Fee for To). The "To" drawer adds an enter/paste address field with
+ * a QR scanner. Static data — asset/chain icons come from Relay's icon CDN and
+ * the address avatar is generated with boring-avatars.
  */
+
+type Variant = "from" | "to";
 
 interface TokenRow {
 	name: string;
@@ -64,8 +67,8 @@ function tokenKey(t: TokenRow) {
 }
 
 function ChainBadge({ chainId, className }: { chainId: number; className?: string }) {
-	// eslint-disable-next-line @next/next/no-img-element
 	return (
+		// eslint-disable-next-line @next/next/no-img-element
 		<img
 			src={chainIcon(chainId)}
 			alt=""
@@ -118,7 +121,35 @@ function Pill({ children }: { children: React.ReactNode }) {
 	);
 }
 
-function SelectedHeader({ token }: { token: TokenRow }) {
+function SelectedMeta({ variant, token }: { variant: Variant; token: TokenRow }) {
+	if (variant === "to") {
+		return (
+			<div className="flex flex-col items-end gap-2">
+				<Pill>
+					<SlidersHorizontal className="size-3.5" />
+					Slippage 0.5%
+				</Pill>
+				<span className="text-sm text-muted-foreground">Fee $0.25</span>
+			</div>
+		);
+	}
+	return (
+		<div className="flex flex-col items-end gap-2">
+			<div className="flex gap-2">
+				<Pill>
+					<FlaskConical className="size-3.5" />
+					Test
+				</Pill>
+				<Pill>Max</Pill>
+			</div>
+			<span className="text-sm text-muted-foreground">
+				{token.amount} {token.symbol}
+			</span>
+		</div>
+	);
+}
+
+function SelectedHeader({ variant, token }: { variant: Variant; token: TokenRow }) {
 	return (
 		<div className="flex items-start justify-between">
 			<div className="flex items-center gap-3">
@@ -129,38 +160,37 @@ function SelectedHeader({ token }: { token: TokenRow }) {
 					<span className="text-xl font-semibold text-foreground">{token.name}</span>
 				</div>
 			</div>
-			<div className="flex flex-col items-end gap-2">
-				<div className="flex gap-2">
-					<Pill>
-						<FlaskConical className="size-3.5" />
-						Test
-					</Pill>
-					<Pill>Max</Pill>
-				</div>
-				<span className="text-sm text-muted-foreground">
-					{token.amount} {token.symbol}
-				</span>
-			</div>
+			<SelectedMeta variant={variant} token={token} />
 		</div>
 	);
 }
 
-export function FromBox() {
+export function TokenBox({
+	variant,
+	triggerClassName,
+}: {
+	variant: Variant;
+	triggerClassName?: string;
+}) {
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<TokenRow | null>(null);
+	const label = variant === "from" ? "From" : "To";
 
 	return (
 		<Drawer.Root open={open} onOpenChange={setOpen}>
 			<button
 				type="button"
 				onClick={() => setOpen(true)}
-				className="-mx-5 -mt-5 block w-[calc(100%+2.5rem)] cursor-pointer rounded-t-3xl px-5 pb-5 pt-5 text-left transition-colors hover:bg-foreground/[0.03]"
+				className={cn(
+					"block cursor-pointer text-left transition-colors",
+					triggerClassName,
+				)}
 			>
 				{selected ? (
-					<SelectedHeader token={selected} />
+					<SelectedHeader variant={variant} token={selected} />
 				) : (
 					<span className="block text-5xl font-semibold text-muted-foreground">
-						From...
+						{label}...
 					</span>
 				)}
 			</button>
@@ -176,22 +206,39 @@ export function FromBox() {
 					<div className="flex flex-col gap-4 px-5 pt-4">
 						<div className="flex items-center justify-between">
 							<Drawer.Title className="text-2xl font-bold text-foreground">
-								From
+								{label}
 							</Drawer.Title>
 							<Drawer.Close className="flex size-9 cursor-pointer items-center justify-center rounded-full bg-foreground/10 text-muted-foreground transition-colors hover:bg-foreground/15">
 								<X className="size-5" />
 							</Drawer.Close>
 						</div>
 
-						<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3.5">
-							<div className="size-7 shrink-0 overflow-hidden rounded-full">
-								<Avatar size={28} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
+						{variant === "from" ? (
+							<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3.5">
+								<div className="size-7 shrink-0 overflow-hidden rounded-full">
+									<Avatar size={28} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
+								</div>
+								<span className="flex-1 text-lg font-semibold text-foreground">
+									0x71C7...976F
+								</span>
+								<Lock className="size-4 text-muted-foreground" />
 							</div>
-							<span className="flex-1 text-lg font-semibold text-foreground">
-								0x71C7...976F
-							</span>
-							<Lock className="size-4 text-muted-foreground" />
-						</div>
+						) : (
+							<div className="flex items-stretch gap-2">
+								<input
+									type="text"
+									placeholder="Enter or paste address"
+									className="flex-1 rounded-2xl bg-foreground/[0.06] px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+								/>
+								<button
+									type="button"
+									aria-label="Scan QR code"
+									className="flex aspect-square shrink-0 cursor-pointer items-center justify-center rounded-2xl bg-foreground/[0.06] text-muted-foreground transition-colors hover:bg-foreground/10"
+								>
+									<Scan className="size-5" />
+								</button>
+							</div>
+						)}
 
 						<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3">
 							<Search className="size-5 shrink-0 text-muted-foreground" />
@@ -230,7 +277,7 @@ export function FromBox() {
 						</div>
 					</div>
 
-					<div className="mt-2 flex-1 overflow-y-auto px-5 pb-8">
+					<div className="scrollbar-subtle mt-2 flex-1 overflow-y-auto px-5 pb-8">
 						{TOKENS.map((t) => {
 							const isSelected = selected !== null && tokenKey(selected) === tokenKey(t);
 							return (
