@@ -1,11 +1,13 @@
 "use client";
 
 import Avatar from "boring-avatars";
+import { AnimatePresence, motion } from "framer-motion";
 import { FlaskConical, Lock, Scan, Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Drawer } from "vaul";
 
 import { HapticButton } from "@/components/haptic-button";
+import { QrScanner } from "@/components/qr-scanner";
 import { ConnectWalletControl } from "@/components/wallet-connect";
 import { cn } from "@/lib/utils";
 
@@ -283,6 +285,9 @@ export function TokenBox({
 	const searchRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<HTMLDivElement>(null);
 	const [activeIndex, setActiveIndex] = useState(0);
+	// "To" address field + QR scanner state.
+	const [address, setAddress] = useState("");
+	const [scanning, setScanning] = useState(false);
 	const label = variant === "from" ? "From" : "To";
 
 	// Keyboard shortcut (web): ⌘F / Ctrl+F opens the From search, ⌘K / Ctrl+K
@@ -363,7 +368,14 @@ export function TokenBox({
 	}, [activeIndex, open]);
 
 	return (
-		<Drawer.Root open={open} onOpenChange={setOpen}>
+		<Drawer.Root
+			open={open}
+			onOpenChange={(next) => {
+				setOpen(next);
+				// Drop the camera + scanner view whenever the sheet closes.
+				if (!next) setScanning(false);
+			}}
+		>
 			<div
 				className={cn(
 					"relative block text-left transition-colors",
@@ -383,25 +395,41 @@ export function TokenBox({
 					/>
 				</div>
 				<div className="pointer-events-none relative flex min-h-[3.75rem] flex-col justify-center">
-					{selected ? (
-						<SelectedHeader
-							variant={variant}
-							token={selected}
-							onSetAmount={onSetAmount}
-							slippage={slippage}
-							onOpenSlippage={onOpenSlippage}
-						/>
-					) : (
-						<span className="block text-5xl font-semibold text-muted-foreground">
-							{label}...
-						</span>
-					)}
-					{!selected && (
-						<kbd className="pointer-events-none absolute right-0 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
-							<span className="text-xs">⌘</span>
-							{variant === "from" ? "F" : "K"}
-						</kbd>
-					)}
+					<AnimatePresence mode="wait" initial={false}>
+						{selected ? (
+							<motion.div
+								key="selected"
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={{ duration: 0.2, ease: "easeOut" }}
+							>
+								<SelectedHeader
+									variant={variant}
+									token={selected}
+									onSetAmount={onSetAmount}
+									slippage={slippage}
+									onOpenSlippage={onOpenSlippage}
+								/>
+							</motion.div>
+						) : (
+							<motion.div
+								key="placeholder"
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={{ duration: 0.2, ease: "easeOut" }}
+							>
+								<span className="block text-5xl font-semibold text-muted-foreground">
+									{label}...
+								</span>
+								<kbd className="pointer-events-none absolute right-0 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+									<span className="text-xs">⌘</span>
+									{variant === "from" ? "F" : "K"}
+								</kbd>
+							</motion.div>
+						)}
+					</AnimatePresence>
 				</div>
 			</div>
 
@@ -413,7 +441,7 @@ export function TokenBox({
 				>
 					<div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-foreground/20" />
 
-					<div className="flex flex-col gap-4 px-5 pt-4">
+					<div className="flex flex-col gap-4 px-3 pt-4">
 						<div className="flex items-center justify-between">
 							<Drawer.Title className="text-2xl font-bold text-foreground">
 								{label}
@@ -442,20 +470,46 @@ export function TokenBox({
 								/>
 							)
 						) : (
-							<div className="flex items-stretch gap-2">
-								<input
-									type="text"
-									placeholder="Enter or paste address"
-									className="flex-1 rounded-2xl bg-foreground/[0.06] px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-								/>
-								<button
-									type="button"
-									aria-label="Scan QR code"
-									className="flex aspect-square shrink-0 cursor-pointer items-center justify-center rounded-2xl bg-foreground/[0.06] text-muted-foreground transition-colors hover:bg-foreground/10"
-								>
-									<Scan className="size-5" />
-								</button>
-							</div>
+							scanning ? (
+								<div className="flex flex-col gap-3">
+									<QrScanner
+										onScan={(addr) => {
+											setAddress(addr);
+											setScanning(false);
+										}}
+									/>
+									<HapticButton
+										type="button"
+										onClick={() => setScanning(false)}
+										wrapperClassName="block w-full"
+										className="h-12 w-full rounded-2xl bg-foreground/[0.06] text-base font-semibold text-foreground transition-colors hover:bg-foreground/10"
+									>
+										Cancel
+									</HapticButton>
+								</div>
+							) : (
+								<div className="flex gap-2">
+									<input
+										type="text"
+										value={address}
+										onChange={(e) => setAddress(e.target.value)}
+										placeholder="Enter or paste address"
+										autoComplete="off"
+										autoCorrect="off"
+										spellCheck={false}
+										className="h-[3.25rem] min-w-0 flex-1 rounded-2xl bg-foreground/[0.06] px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+									/>
+									<HapticButton
+										type="button"
+										onClick={() => setScanning(true)}
+										aria-label="Scan QR code"
+										wrapperClassName="grid size-[3.25rem] shrink-0"
+										className="flex size-full items-center justify-center rounded-2xl bg-foreground/[0.06] text-muted-foreground transition-colors hover:bg-foreground/10"
+									>
+										<Scan className="size-5" />
+									</HapticButton>
+								</div>
+							)
 						)}
 
 						<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3">
@@ -470,13 +524,13 @@ export function TokenBox({
 							/>
 						</div>
 
-						<div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+						<div className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 							{FILTERS.map((f) => (
 								<button
 									key={f.label}
 									type="button"
 									className={cn(
-										"flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+										"flex shrink-0 cursor-pointer items-center gap-2 rounded-full py-2 pl-2 pr-4 text-sm font-semibold transition-colors",
 										f.active
 											? "bg-foreground text-background"
 											: "bg-foreground/[0.06] text-foreground hover:bg-foreground/10",
@@ -487,10 +541,10 @@ export function TokenBox({
 										<img
 											src={chainIcon(f.chainId)}
 											alt=""
-											className="size-4 rounded-full object-cover"
+											className="size-6 rounded-full object-cover"
 										/>
 									) : (
-										<span className="size-4 rounded-full border-2 border-current" />
+										<span className="size-6 rounded-full border-2 border-current" />
 									)}
 									{f.label}
 								</button>
@@ -500,7 +554,7 @@ export function TokenBox({
 
 					<div
 						ref={listRef}
-						className="scroll-fade scrollbar-subtle mt-2 min-h-0 flex-1 overflow-y-auto px-5 pb-8"
+						className="scroll-fade scrollbar-subtle mt-2 min-h-0 flex-1 overflow-y-auto px-3 pb-8"
 					>
 						{filtered.length === 0 && (
 							<p className="py-8 text-center text-sm text-muted-foreground">

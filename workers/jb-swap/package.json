@@ -4,7 +4,8 @@
 	"private": true,
 	"packageManager": "bun@1.3.0",
 	"scripts": {
-		"dev": "wrangler dev",
+		"dev": "next dev --turbopack -p 33003",
+		"dev:cf": "wrangler dev",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
