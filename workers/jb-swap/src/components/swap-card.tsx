@@ -1,4 +1,6 @@
-import { ArrowUpDown, FlaskConical, SlidersHorizontal } from "lucide-react";
+import { ArrowUpDown, SlidersHorizontal } from "lucide-react";
+
+import { FromBox } from "@/components/token-drawer";
 
 /**
  * Visual scaffold for the swap interface. Static, non-functional —
@@ -71,20 +73,8 @@ export function SwapCard() {
 		<div className="w-full max-w-md">
 			{/* You pay */}
 			<section className="rounded-3xl bg-card px-5 pb-8 pt-5">
-				<div className="flex items-start justify-between">
-					<TokenInfo variant="eth" name="Ethereum" />
-					<div className="flex flex-col items-end gap-2">
-						<div className="flex gap-2">
-							<Pill>
-								<FlaskConical className="size-3.5" />
-								Test
-							</Pill>
-							<Pill>Max</Pill>
-						</div>
-						<span className="text-sm text-muted-foreground">0.4218 ETH</span>
-					</div>
-				</div>
-				<div className="-mx-5 mt-5 mb-2 border-t-2 border-background" />
+				<FromBox />
+				<div className="-mx-5 mb-2 border-t-2 border-background" />
 				<div className="flex flex-col items-center gap-3">
 					<span className="text-6xl font-bold tracking-tight text-foreground">
 						0.05
@@ -121,7 +111,7 @@ export function SwapCard() {
 				</div>
 				<div className="-mx-5 mt-5 mb-2 border-t-2 border-background" />
 				<div className="flex flex-col items-center gap-3">
-					<span className="text-6xl font-bold tracking-tight text-foreground">
+					<span className="text-6xl font-bold tracking-tight text-muted-foreground">
 						81.9534
 					</span>
 					<Pill>
