@@ -224,7 +224,6 @@ export function SwapCard() {
 	return (
 		<motion.div
 			className="w-full max-w-md"
-			layout
 			initial={{ opacity: 0, y: 12 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.4, ease: "easeOut" }}

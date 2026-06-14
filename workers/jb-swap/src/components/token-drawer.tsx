@@ -2,7 +2,7 @@
 
 import Avatar from "boring-avatars";
 import { FlaskConical, Lock, Scan, Search, SlidersHorizontal, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Drawer } from "vaul";
 
 import { HapticButton } from "@/components/haptic-button";
@@ -278,7 +278,33 @@ export function TokenBox({
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<TokenRow | null>(null);
 	const [query, setQuery] = useState("");
+	const searchRef = useRef<HTMLInputElement>(null);
+	const listRef = useRef<HTMLDivElement>(null);
+	const [activeIndex, setActiveIndex] = useState(0);
 	const label = variant === "from" ? "From" : "To";
+
+	// Keyboard shortcut (web): ⌘F / Ctrl+F opens the From search, ⌘K / Ctrl+K
+	// opens the To search.
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey) return;
+			const k = e.key.toLowerCase();
+			if ((variant === "from" && k === "f") || (variant === "to" && k === "k")) {
+				e.preventDefault();
+				setOpen(true);
+			}
+		};
+		window.addEventListener("keydown", onKey);
+		return () => window.removeEventListener("keydown", onKey);
+	}, [variant]);
+
+	// Focus the search field when opened on web (skip mobile to avoid popping up
+	// the on-screen keyboard).
+	useEffect(() => {
+		if (!open || !window.matchMedia("(min-width: 768px)").matches) return;
+		const t = setTimeout(() => searchRef.current?.focus(), 150);
+		return () => clearTimeout(t);
+	}, [open]);
 
 	const filtered =
 		query.trim() === ""
@@ -286,6 +312,54 @@ export function TokenBox({
 			: TOKENS.filter((t) =>
 					fuzzyMatch(query, `${t.name} ${t.symbol} ${t.chain} ${t.address}`),
 				);
+
+	const filteredRef = useRef(filtered);
+	filteredRef.current = filtered;
+	const activeRef = useRef(activeIndex);
+	activeRef.current = activeIndex;
+
+	const selectToken = (t: TokenRow) => {
+		setSelected(t);
+		setOpen(false);
+		onSelect?.(t);
+	};
+
+	// Reset the keyboard highlight when the list opens or the query changes.
+	useEffect(() => {
+		setActiveIndex(0);
+	}, [open, query]);
+
+	// While open: ↑/↓ move the highlight, Enter selects the highlighted token.
+	useEffect(() => {
+		if (!open) return;
+		const onKey = (e: KeyboardEvent) => {
+			const list = filteredRef.current;
+			if (e.key === "ArrowDown") {
+				e.preventDefault();
+				setActiveIndex((i) => Math.min(i + 1, list.length - 1));
+			} else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				setActiveIndex((i) => Math.max(i - 1, 0));
+			} else if (e.key === "Enter") {
+				const t = list[activeRef.current];
+				if (t) {
+					e.preventDefault();
+					selectToken(t);
+				}
+			}
+		};
+		window.addEventListener("keydown", onKey);
+		return () => window.removeEventListener("keydown", onKey);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [open]);
+
+	// Keep the highlighted row scrolled into view.
+	useEffect(() => {
+		if (!open) return;
+		listRef.current
+			?.querySelector('[data-active="true"]')
+			?.scrollIntoView({ block: "nearest" });
+	}, [activeIndex, open]);
 
 	return (
 		<Drawer.Root open={open} onOpenChange={setOpen}>
@@ -320,6 +394,12 @@ export function TokenBox({
 						<span className="block text-5xl font-semibold text-muted-foreground">
 							{label}...
 						</span>
+					)}
+					{!selected && (
+						<kbd className="pointer-events-none absolute right-0 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+							<span className="text-xs">⌘</span>
+							{variant === "from" ? "F" : "K"}
+						</kbd>
 					)}
 				</div>
 			</div>
@@ -380,6 +460,7 @@ export function TokenBox({
 						<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3">
 							<Search className="size-5 shrink-0 text-muted-foreground" />
 							<input
+								ref={searchRef}
 								type="text"
 								value={query}
 								onChange={(e) => setQuery(e.target.value)}
@@ -416,26 +497,27 @@ export function TokenBox({
 						</div>
 					</div>
 
-					<div className="scrollbar-subtle mt-2 flex-1 overflow-y-auto px-5 pb-8">
+					<div
+						ref={listRef}
+						className="scrollbar-subtle mt-2 flex-1 overflow-y-auto px-5 pb-8"
+					>
 						{filtered.length === 0 && (
 							<p className="py-8 text-center text-sm text-muted-foreground">
 								No tokens found
 							</p>
 						)}
-						{filtered.map((t) => {
+						{filtered.map((t, i) => {
 							const isSelected = selected !== null && tokenKey(selected) === tokenKey(t);
 							return (
 								<HapticButton
 									key={tokenKey(t)}
 									type="button"
+									data-active={i === activeIndex}
 									wrapperClassName="block w-full"
-									onClick={() => {
-										setSelected(t);
-										setOpen(false);
-										onSelect?.(t);
-									}}
+									onClick={() => selectToken(t)}
 									className={cn(
 										"flex w-full cursor-pointer items-center gap-3 rounded-xl py-3 text-left transition-colors hover:bg-foreground/[0.04]",
+										i === activeIndex && "bg-foreground/[0.06]",
 										isSelected && "opacity-50",
 									)}
 								>
