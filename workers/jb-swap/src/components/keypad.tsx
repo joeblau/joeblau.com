@@ -35,7 +35,7 @@ export function MobileKeypad({ onKey }: { onKey: (key: string) => void }) {
 					transition={{ duration: 0.12, ease: "easeOut" }}
 					className="overflow-hidden"
 				>
-					<div className="grid grid-cols-3 pt-3">
+					<div className="grid grid-cols-3 pt-2">
 						{KEYS.map((k) => (
 							<HapticButton
 								key={k}

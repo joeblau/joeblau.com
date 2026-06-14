@@ -1,12 +1,14 @@
 "use client";
 
 import NumberFlow from "@number-flow/react";
+import { motion } from "framer-motion";
 import { ArrowUpDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { HapticButton } from "@/components/haptic-button";
 import { MobileKeypad } from "@/components/keypad";
 import { SlippageDrawer } from "@/components/slippage-drawer";
+import { ThemeToggleButton2 } from "@/components/ui/skiper-ui/skiper4";
 import { price, TokenBox, type TokenRow } from "@/components/token-drawer";
 import { cn } from "@/lib/utils";
 
@@ -43,13 +45,14 @@ function Pill({
 	children: React.ReactNode;
 }) {
 	return (
-		<button
+		<HapticButton
 			type="button"
 			onClick={onClick}
+			wrapperClassName="pointer-events-auto inline-grid"
 			className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.07] px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-foreground/[0.12]"
 		>
 			{children}
-		</button>
+		</HapticButton>
 	);
 }
 
@@ -72,10 +75,12 @@ function AmountInput({
 	value,
 	prefix,
 	muted,
+	sizeClassName = "text-3xl md:text-5xl",
 }: {
 	value: string;
 	prefix?: string;
 	muted?: boolean;
+	sizeClassName?: string;
 }) {
 	const dot = value.indexOf(".");
 	const fractionDigits = dot === -1 ? 0 : Math.min(value.length - dot - 1, 8);
@@ -96,7 +101,8 @@ function AmountInput({
 					useGrouping: false,
 				}}
 				className={cn(
-					"text-5xl font-bold tracking-tight",
+					"font-bold tracking-tight [--number-flow-mask-height:0px]",
+					sizeClassName,
 					muted ? "text-muted-foreground" : "text-foreground",
 				)}
 			/>
@@ -112,6 +118,8 @@ export function SwapCard() {
 	const [toMode, setToMode] = useState<"token" | "usd">("token");
 	const [slippage, setSlippage] = useState(0.005);
 	const [slippageOpen, setSlippageOpen] = useState(false);
+	const [connected, setConnected] = useState(false);
+	const [genAddress, setGenAddress] = useState(false);
 	const action = getActionLabel(fromToken, toToken);
 
 	// Quote is always driven by the FROM token units, regardless of display mode.
@@ -214,17 +222,27 @@ export function SwapCard() {
 	}, []);
 
 	return (
-		<div className="w-full max-w-md">
+		<motion.div
+			className="w-full max-w-md"
+			layout
+			initial={{ opacity: 0, y: 12 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.4, ease: "easeOut" }}
+		>
 			{/* You pay */}
-			<section className="rounded-3xl bg-card px-5 pb-8 pt-5">
+			<section className="rounded-3xl bg-card px-4 pb-6 pt-4">
 				<TokenBox
 					variant="from"
 					onSelect={setFromToken}
 					onSetAmount={setFromAmount}
-					triggerClassName="-mx-5 -mt-5 w-[calc(100%+2.5rem)] rounded-t-3xl px-5 pb-5 pt-5 hover:bg-foreground/[0.03]"
+					connected={connected}
+					onConnect={() => setConnected(true)}
+					genAddress={genAddress}
+					onToggleGenAddress={() => setGenAddress((v) => !v)}
+					triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4 hover:bg-foreground/[0.03]"
 				/>
-				<div className="-mx-5 mb-0.5 border-t-2 border-background" />
-				<div className="flex flex-col items-center gap-0">
+				<div className="-mx-4 border-t-2 border-background" />
+				<div className="flex flex-col items-center gap-4 pt-4">
 					<AmountInput
 						value={fromAmount}
 						prefix={fromMode === "usd" ? "$" : undefined}
@@ -240,27 +258,31 @@ export function SwapCard() {
 			</section>
 
 			{/* Swap direction */}
-			<div className="relative z-10 mx-auto -my-4 flex w-fit">
+			<div className="relative z-10 mx-auto -my-2 flex w-fit">
 				<HapticButton
 					type="button"
-					className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background transition-colors hover:bg-primary/90"
+					style={{
+						background:
+							"linear-gradient(hsl(var(--foreground) / 0.07), hsl(var(--foreground) / 0.07)), hsl(var(--card))",
+					}}
+					className="flex size-8 items-center justify-center rounded-full text-muted-foreground ring-1 ring-background"
 					aria-label="Swap direction"
 				>
-					<ArrowUpDown className="size-5" />
+					<ArrowUpDown className="size-4" />
 				</HapticButton>
 			</div>
 
 			{/* You receive */}
-			<section className="rounded-3xl bg-card px-5 pb-5 pt-8">
+			<section className="rounded-3xl bg-card px-4 pb-4 pt-6">
 				<TokenBox
 					variant="to"
 					onSelect={setToToken}
 					slippage={slippage}
 					onOpenSlippage={() => setSlippageOpen(true)}
-					triggerClassName="-mx-5 -mt-8 w-[calc(100%+2.5rem)] rounded-t-3xl px-5 pb-5 pt-8 hover:bg-foreground/[0.03]"
+					triggerClassName="-mx-4 -mt-6 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-6 hover:bg-foreground/[0.03]"
 				/>
-				<div className="-mx-5 mb-0.5 border-t-2 border-background" />
-				<div className="flex flex-col items-center gap-0">
+				<div className="-mx-4 border-t-2 border-background" />
+				<div className="flex flex-col items-center gap-4 pt-4">
 					<AmountInput
 						value={trim(toMode === "token" ? toAmount : toUsd)}
 						prefix={toMode === "usd" ? "$" : undefined}
@@ -278,14 +300,20 @@ export function SwapCard() {
 
 			<MobileKeypad onKey={handleKey} />
 
-			<HapticButton
-				wrapperClassName="mt-4 grid w-full"
-				type="button"
-				disabled={!canSwap}
-				className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-foreground/[0.08] disabled:text-muted-foreground disabled:hover:bg-foreground/[0.08] disabled:active:scale-100"
-			>
-				{actionLabel}
-			</HapticButton>
+			{/* Action button with the theme toggle to its left. */}
+			<div className="mt-2 flex items-center gap-2">
+				<div className="flex shrink-0">
+					<ThemeToggleButton2 className="size-12 p-2" />
+				</div>
+				<HapticButton
+					wrapperClassName="grid flex-1"
+					type="button"
+					disabled={!canSwap}
+					className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-foreground/[0.08] disabled:text-muted-foreground disabled:hover:bg-foreground/[0.08] disabled:active:scale-100"
+				>
+					{actionLabel}
+				</HapticButton>
+			</div>
 
 			<SlippageDrawer
 				open={slippageOpen}
@@ -293,6 +321,6 @@ export function SwapCard() {
 				value={slippage}
 				onChange={setSlippage}
 			/>
-		</div>
+		</motion.div>
 	);
 }

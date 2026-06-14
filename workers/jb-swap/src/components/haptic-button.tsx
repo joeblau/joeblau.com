@@ -14,9 +14,11 @@ import { cn } from "@/lib/utils";
  * On non-WebKit browsers the switch is an ordinary (invisible) checkbox and the
  * click-forwarding still works, so it's a no-op visually/behaviorally elsewhere.
  *
- * The button and the switch share a single CSS grid cell so the switch always
- * matches the button's size without changing layout. `wrapperClassName` controls
- * the wrapper's display/width (e.g. "grid w-full" for full-width buttons).
+ * The switch is absolutely positioned over the whole button (inset-0), so a tap
+ * anywhere on the button — including its padding and corners — triggers the
+ * haptic, without changing layout. `wrapperClassName` controls the wrapper's
+ * display/width (e.g. "grid w-full" for full-width buttons, "absolute inset-0"
+ * to fill a positioned parent).
  */
 export function HapticButton({
 	className,
@@ -27,7 +29,7 @@ export function HapticButton({
 }: ComponentProps<"button"> & { wrapperClassName?: string }) {
 	const ref = useRef<HTMLButtonElement>(null);
 	return (
-		<span className={cn("relative [&>*]:[grid-area:1/1]", wrapperClassName)}>
+		<span className={cn("relative", wrapperClassName)}>
 			<button ref={ref} className={className} disabled={disabled} {...props}>
 				{children}
 			</button>
@@ -38,7 +40,7 @@ export function HapticButton({
 				ref={(el) => el?.setAttribute("switch", "")}
 				onChange={() => ref.current?.click()}
 				className={cn(
-					"m-0 size-full opacity-0 [clip-path:inset(0_round_999px)] [-webkit-tap-highlight-color:transparent]",
+					"absolute inset-0 m-0 size-full opacity-0 [-webkit-tap-highlight-color:transparent]",
 					disabled ? "pointer-events-none" : "cursor-pointer",
 				)}
 				style={{ touchAction: "manipulation" }}

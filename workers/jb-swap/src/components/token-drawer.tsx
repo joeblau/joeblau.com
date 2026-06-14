@@ -5,6 +5,8 @@ import { FlaskConical, Lock, Scan, Search, SlidersHorizontal, X } from "lucide-r
 import { useState } from "react";
 import { Drawer } from "vaul";
 
+import { HapticButton } from "@/components/haptic-button";
+import { ConnectWalletControl } from "@/components/wallet-connect";
 import { cn } from "@/lib/utils";
 
 /**
@@ -156,14 +158,14 @@ function ClickablePill({
 	children: React.ReactNode;
 }) {
 	return (
-		<span
-			role="button"
-			tabIndex={0}
+		<HapticButton
+			type="button"
 			onClick={onClick}
+			wrapperClassName="pointer-events-auto inline-grid"
 			className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.07] px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-foreground/[0.12]"
 		>
 			{children}
-		</span>
+		</HapticButton>
 	);
 }
 
@@ -230,7 +232,7 @@ function SelectedHeader({
 	onOpenSlippage?: () => void;
 }) {
 	return (
-		<div className="flex items-start justify-between">
+		<div className="flex items-start justify-between gap-3">
 			<div className="flex items-center gap-3">
 				<AssetStack token={token} />
 				<div className="flex flex-col leading-none -space-y-0.5">
@@ -257,6 +259,10 @@ export function TokenBox({
 	onSetAmount,
 	slippage,
 	onOpenSlippage,
+	connected,
+	onConnect,
+	genAddress,
+	onToggleGenAddress,
 }: {
 	variant: Variant;
 	triggerClassName?: string;
@@ -264,6 +270,10 @@ export function TokenBox({
 	onSetAmount?: (amount: string) => void;
 	slippage?: number;
 	onOpenSlippage?: () => void;
+	connected?: boolean;
+	onConnect?: () => void;
+	genAddress?: boolean;
+	onToggleGenAddress?: () => void;
 }) {
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<TokenRow | null>(null);
@@ -279,28 +289,40 @@ export function TokenBox({
 
 	return (
 		<Drawer.Root open={open} onOpenChange={setOpen}>
-			<button
-				type="button"
-				onClick={() => setOpen(true)}
+			<div
 				className={cn(
-					"block cursor-pointer text-left transition-colors",
+					"relative block text-left transition-colors",
 					triggerClassName,
 				)}
 			>
-				{selected ? (
-					<SelectedHeader
-						variant={variant}
-						token={selected}
-						onSetAmount={onSetAmount}
-						slippage={slippage}
-						onOpenSlippage={onOpenSlippage}
+				{/* Full-area tap target that opens the drawer (with haptics). It sits
+				    behind a pass-through content layer; the pills re-enable pointer
+				    events so they act on their own without opening the drawer. */}
+				<div className="absolute inset-0">
+					<HapticButton
+						type="button"
+						onClick={() => setOpen(true)}
+						aria-label={`Select ${label} token`}
+						wrapperClassName="grid size-full"
+						className="size-full cursor-pointer"
 					/>
-				) : (
-					<span className="block text-5xl font-semibold text-muted-foreground">
-						{label}...
-					</span>
-				)}
-			</button>
+				</div>
+				<div className="pointer-events-none relative flex min-h-[3.75rem] flex-col justify-center">
+					{selected ? (
+						<SelectedHeader
+							variant={variant}
+							token={selected}
+							onSetAmount={onSetAmount}
+							slippage={slippage}
+							onOpenSlippage={onOpenSlippage}
+						/>
+					) : (
+						<span className="block text-5xl font-semibold text-muted-foreground">
+							{label}...
+						</span>
+					)}
+				</div>
+			</div>
 
 			<Drawer.Portal>
 				<Drawer.Overlay className="fixed inset-0 z-50 bg-black/60" />
@@ -321,15 +343,23 @@ export function TokenBox({
 						</div>
 
 						{variant === "from" ? (
-							<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3.5">
-								<div className="size-7 shrink-0 overflow-hidden rounded-full">
-									<Avatar size={28} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
+							connected ? (
+								<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3.5">
+									<div className="size-7 shrink-0 overflow-hidden rounded-full">
+										<Avatar size={28} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
+									</div>
+									<span className="flex-1 text-lg font-semibold text-foreground">
+										0x71C7...976F
+									</span>
+									<Lock className="size-4 text-muted-foreground" />
 								</div>
-								<span className="flex-1 text-lg font-semibold text-foreground">
-									0x71C7...976F
-								</span>
-								<Lock className="size-4 text-muted-foreground" />
-							</div>
+							) : (
+								<ConnectWalletControl
+									onConnect={() => onConnect?.()}
+									genAddress={genAddress ?? false}
+									onToggleGenAddress={() => onToggleGenAddress?.()}
+								/>
+							)
 						) : (
 							<div className="flex items-stretch gap-2">
 								<input
@@ -395,9 +425,10 @@ export function TokenBox({
 						{filtered.map((t) => {
 							const isSelected = selected !== null && tokenKey(selected) === tokenKey(t);
 							return (
-								<button
+								<HapticButton
 									key={tokenKey(t)}
 									type="button"
+									wrapperClassName="block w-full"
 									onClick={() => {
 										setSelected(t);
 										setOpen(false);
@@ -420,7 +451,7 @@ export function TokenBox({
 										<p className="font-semibold text-foreground">{t.amount}</p>
 										<p className="text-sm text-muted-foreground">{t.usd}</p>
 									</div>
-								</button>
+								</HapticButton>
 							);
 						})}
 					</div>

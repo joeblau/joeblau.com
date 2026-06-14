@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SiteHeader } from "@/components/site-header";
 
 const nunito = Nunito({ subsets: ["latin"], display: "swap" });
 
@@ -27,7 +26,6 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${nunito.className} antialiased`}>
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-					<SiteHeader />
 					{children}
 				</ThemeProvider>
 			</body>
