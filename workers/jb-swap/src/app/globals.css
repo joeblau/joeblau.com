@@ -129,3 +129,145 @@
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
+
+/* Apple-Intelligence edge glow (skiper86). The element is painted with the
+   animated linear-gradient (set inline by the component); here we (1) round the
+   outer corners so the glow follows a rounded frame and (2) feather the
+   gradient inward to transparent so the centre stays clear and the page shows
+   through. Four additive mask layers (one per edge) union under the DEFAULT
+   `add` compositing — no mask-composite needed, so it's robust across browsers.
+   Each layer uses a smooth ease-out alpha falloff (not a linear ramp) so the
+   thin band fades softly; `--feather` (set by the component's `intensity`)
+   controls the band thickness. Corners read brighter where two layers overlap,
+   matching the Apple look. */
+.apple-edge-glow {
+  --feather: 32px;
+  border-radius: 26px;
+  -webkit-mask-image: linear-gradient(
+      to top,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to left,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to right,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    );
+  mask-image: linear-gradient(
+      to top,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to left,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to right,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    );
+}
+
+/* Skiper87-style scroll fade: a top/bottom mask whose fade bands grow/shrink
+   with scroll position (pure CSS via scroll-driven animation-timeline). The top
+   band is 0 at the very top, the bottom band is 0 at the very bottom — so the
+   first/last rows are never clipped. Degrades to no fade where unsupported. */
+@property --ft {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@property --fb {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@keyframes scroll-fade-top {
+  0%,
+  6% {
+    --ft: 0%;
+  }
+  14%,
+  100% {
+    --ft: 8%;
+  }
+}
+@keyframes scroll-fade-bottom {
+  0%,
+  86% {
+    --fb: 8%;
+  }
+  94%,
+  100% {
+    --fb: 0%;
+  }
+}
+.scroll-fade {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--ft),
+    #000 calc(100% - var(--fb)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--ft),
+    #000 calc(100% - var(--fb)),
+    transparent 100%
+  );
+  animation-name: scroll-fade-top, scroll-fade-bottom;
+  animation-timeline: scroll(self), scroll(self);
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}

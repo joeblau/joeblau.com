@@ -2,13 +2,14 @@
 
 import NumberFlow from "@number-flow/react";
 import { motion } from "framer-motion";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { AppleBorderGradient } from "@/components/apple-border-gradient";
+import { AppMenu } from "@/components/app-menu";
 import { HapticButton } from "@/components/haptic-button";
 import { MobileKeypad } from "@/components/keypad";
 import { SlippageDrawer } from "@/components/slippage-drawer";
-import { ThemeToggleButton2 } from "@/components/ui/skiper-ui/skiper4";
 import { price, TokenBox, type TokenRow } from "@/components/token-drawer";
 import { cn } from "@/lib/utils";
 
@@ -120,6 +121,7 @@ export function SwapCard() {
 	const [slippageOpen, setSlippageOpen] = useState(false);
 	const [connected, setConnected] = useState(false);
 	const [genAddress, setGenAddress] = useState(false);
+	const [submitting, setSubmitting] = useState(false);
 	const action = getActionLabel(fromToken, toToken);
 
 	// Quote is always driven by the FROM token units, regardless of display mode.
@@ -161,6 +163,35 @@ export function SwapCard() {
 	};
 	const toggleToMode = () =>
 		setToMode((m) => (m === "token" ? "usd" : "token"));
+
+	// Flip only swaps the chosen assets/chains; the entered amount stays put and
+	// the quote re-derives. No-op until both sides have a token.
+	const swapTokens = () => {
+		if (fromToken === null || toToken === null) return;
+		setFromToken(toToken);
+		setToToken(fromToken);
+	};
+
+	// Clear tokens, amount, and denomination back to the initial state.
+	const resetForm = () => {
+		setFromAmount("0");
+		setFromToken(null);
+		setToToken(null);
+		setFromMode("token");
+		setToMode("token");
+	};
+	const isPristine =
+		fromToken === null && toToken === null && Number(fromAmount) === 0;
+
+	// Send/Swap/Bridge: play the Apple-gradient effect for 3s, then reset the form.
+	const handleSubmit = () => {
+		if (!canSwap || submitting) return;
+		setSubmitting(true);
+		window.setTimeout(() => {
+			setSubmitting(false);
+			resetForm();
+		}, 3000);
+	};
 
 	// Latest from amount for the global keyboard handler (avoids stale closures).
 	const stateRef = useRef(fromAmount);
@@ -232,6 +263,7 @@ export function SwapCard() {
 			<section className="rounded-3xl bg-card px-4 pb-3 pt-4">
 				<TokenBox
 					variant="from"
+					selected={fromToken}
 					onSelect={setFromToken}
 					onSetAmount={setFromAmount}
 					connected={connected}
@@ -260,12 +292,14 @@ export function SwapCard() {
 			<div className="relative z-10 mx-auto -my-3 flex w-fit">
 				<HapticButton
 					type="button"
+					onClick={swapTokens}
+					disabled={fromToken === null || toToken === null}
 					style={{
 						background:
 							"linear-gradient(hsl(var(--foreground) / 0.07), hsl(var(--foreground) / 0.07)), hsl(var(--card))",
 					}}
-					className="flex size-8 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background"
-					aria-label="Swap direction"
+					className="flex size-8 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background transition-colors disabled:cursor-not-allowed disabled:text-muted-foreground/40"
+					aria-label="Swap assets"
 				>
 					<ArrowUpDown className="size-4" />
 				</HapticButton>
@@ -275,6 +309,7 @@ export function SwapCard() {
 			<section className="rounded-3xl bg-card px-4 pb-0 pt-6">
 				<TokenBox
 					variant="to"
+					selected={toToken}
 					onSelect={setToToken}
 					slippage={slippage}
 					onOpenSlippage={() => setSlippageOpen(true)}
@@ -299,18 +334,26 @@ export function SwapCard() {
 
 			<MobileKeypad onKey={handleKey} />
 
-			{/* Action button with the theme toggle to its left. */}
+			{/* Action button with the menu button to its left. */}
 			<div className="mt-2 flex items-center gap-2">
-				<div className="flex shrink-0">
-					<ThemeToggleButton2 className="size-12 bg-secondary p-2 text-secondary-foreground" />
-				</div>
+				<AppMenu />
 				<HapticButton
 					wrapperClassName="grid flex-1"
 					type="button"
-					disabled={!canSwap}
-					className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-foreground/[0.08] disabled:text-muted-foreground disabled:hover:bg-foreground/[0.08] disabled:active:scale-100"
+					onClick={handleSubmit}
+					disabled={!canSwap || submitting}
+					className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground disabled:hover:bg-secondary disabled:active:scale-100"
 				>
-					{actionLabel}
+					{submitting ? "Confirming…" : actionLabel}
+				</HapticButton>
+				<HapticButton
+					type="button"
+					onClick={resetForm}
+					disabled={isPristine || submitting}
+					aria-label="Reset"
+					className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-secondary disabled:active:scale-100"
+				>
+					<RotateCcw className="size-5" />
 				</HapticButton>
 			</div>
 
@@ -320,6 +363,8 @@ export function SwapCard() {
 				value={slippage}
 				onChange={setSlippage}
 			/>
+
+			<AppleBorderGradient preview={submitting} intensity="xl" />
 		</motion.div>
 	);
 }
