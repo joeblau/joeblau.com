@@ -123,7 +123,7 @@ function TokenIcon({ token }: { token: TokenRow }) {
 			<img
 				src={token.logo}
 				alt={token.name}
-				className="size-11 rounded-full bg-foreground/[0.06] object-cover"
+				className="size-11 rounded-full bg-background object-cover"
 			/>
 			<ChainBadge chainId={token.chainId} className="absolute bottom-0 right-0" />
 		</div>
@@ -327,6 +327,7 @@ export function TokenBox({
 
 	const selectToken = (t: TokenRow) => {
 		setOpen(false);
+		setQuery("");
 		onSelect?.(t);
 	};
 
@@ -470,46 +471,62 @@ export function TokenBox({
 								/>
 							)
 						) : (
-							scanning ? (
-								<div className="flex flex-col gap-3">
-									<QrScanner
-										onScan={(addr) => {
-											setAddress(addr);
-											setScanning(false);
-										}}
-									/>
-									<HapticButton
-										type="button"
-										onClick={() => setScanning(false)}
-										wrapperClassName="block w-full"
-										className="h-12 w-full rounded-2xl bg-foreground/[0.06] text-base font-semibold text-foreground transition-colors hover:bg-foreground/10"
+							<AnimatePresence mode="wait" initial={false}>
+								{scanning ? (
+									<motion.div
+										key="scanner"
+										initial={{ opacity: 0, height: 0 }}
+										animate={{ opacity: 1, height: "auto" }}
+										exit={{ opacity: 0, height: 0 }}
+										transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+										className="flex flex-col gap-3 overflow-hidden"
 									>
-										Cancel
-									</HapticButton>
-								</div>
-							) : (
-								<div className="flex gap-2">
-									<input
-										type="text"
-										value={address}
-										onChange={(e) => setAddress(e.target.value)}
-										placeholder="Enter or paste address"
-										autoComplete="off"
-										autoCorrect="off"
-										spellCheck={false}
-										className="h-[3.25rem] min-w-0 flex-1 rounded-2xl bg-foreground/[0.06] px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-									/>
-									<HapticButton
-										type="button"
-										onClick={() => setScanning(true)}
-										aria-label="Scan QR code"
-										wrapperClassName="grid size-[3.25rem] shrink-0"
-										className="flex size-full items-center justify-center rounded-2xl bg-foreground/[0.06] text-muted-foreground transition-colors hover:bg-foreground/10"
+										<QrScanner
+											onScan={(addr) => {
+												setAddress(addr);
+												setScanning(false);
+											}}
+										/>
+										<HapticButton
+											type="button"
+											onClick={() => setScanning(false)}
+											wrapperClassName="block w-full"
+											className="h-12 w-full rounded-2xl bg-foreground/[0.06] text-base font-semibold text-foreground transition-colors hover:bg-foreground/10"
+										>
+											Cancel
+										</HapticButton>
+									</motion.div>
+								) : (
+									<motion.div
+										key="input"
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.18, ease: "easeOut" }}
+										className="flex gap-2"
 									>
-										<Scan className="size-5" />
-									</HapticButton>
-								</div>
-							)
+										<input
+											type="text"
+											value={address}
+											onChange={(e) => setAddress(e.target.value)}
+											placeholder="Enter or paste address"
+											autoComplete="off"
+											autoCorrect="off"
+											spellCheck={false}
+											className="h-[3.25rem] min-w-0 flex-1 rounded-2xl bg-foreground/[0.06] px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+										/>
+										<HapticButton
+											type="button"
+											onClick={() => setScanning(true)}
+											aria-label="Scan QR code"
+											wrapperClassName="grid size-[3.25rem] shrink-0"
+											className="flex size-full items-center justify-center rounded-2xl bg-foreground/[0.06] text-muted-foreground transition-colors hover:bg-foreground/10"
+										>
+											<Scan className="size-5" />
+										</HapticButton>
+									</motion.div>
+								)}
+							</AnimatePresence>
 						)}
 
 						<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3">
@@ -541,7 +558,7 @@ export function TokenBox({
 										<img
 											src={chainIcon(f.chainId)}
 											alt=""
-											className="size-6 rounded-full object-cover"
+											className="size-6 rounded-full bg-background object-cover"
 										/>
 									) : (
 										<span className="size-6 rounded-full border-2 border-current" />
@@ -574,7 +591,7 @@ export function TokenBox({
 										"flex w-full cursor-pointer items-center gap-3 rounded-full py-2 pl-2 pr-4 text-left transition-colors",
 										i === activeIndex
 											? "bg-foreground/10"
-											: "bg-foreground/[0.06] hover:bg-foreground/10",
+											: "hover:bg-foreground/10",
 										isSelected && "opacity-50",
 									)}
 								>
