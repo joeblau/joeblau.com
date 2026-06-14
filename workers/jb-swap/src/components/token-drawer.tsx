@@ -9,6 +9,7 @@ import { Drawer } from "vaul";
 import { HapticButton } from "@/components/haptic-button";
 import { QrScanner } from "@/components/qr-scanner";
 import { ConnectWalletControl } from "@/components/wallet-connect";
+import { useTranslations } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -123,7 +124,7 @@ function TokenIcon({ token }: { token: TokenRow }) {
 			<img
 				src={token.logo}
 				alt={token.name}
-				className="size-11 rounded-full bg-foreground/[0.06] object-cover"
+				className="size-11 rounded-full bg-background object-cover"
 			/>
 			<ChainBadge chainId={token.chainId} className="absolute bottom-0 right-0" />
 		</div>
@@ -184,6 +185,7 @@ function SelectedMeta({
 	slippage?: number;
 	onOpenSlippage?: () => void;
 }) {
+	const t = useTranslations();
 	if (variant === "to") {
 		return (
 			<div className="flex flex-col items-end gap-2">
@@ -194,9 +196,9 @@ function SelectedMeta({
 					}}
 				>
 					<SlidersHorizontal className="size-3.5" />
-					Slippage {formatPct(slippage ?? 0.005)}
+					{t("tokenDrawer.meta.slippage", { percent: formatPct(slippage ?? 0.005) })}
 				</ClickablePill>
-				<span className="text-sm text-muted-foreground">Fee $0.25</span>
+				<span className="text-sm text-muted-foreground">{t("tokenDrawer.meta.fee")}</span>
 			</div>
 		);
 	}
@@ -209,9 +211,9 @@ function SelectedMeta({
 			<div className="flex gap-2">
 				<ClickablePill onClick={set(computeTest(token))}>
 					<FlaskConical className="size-3.5" />
-					Test
+					{t("tokenDrawer.action.test")}
 				</ClickablePill>
-				<ClickablePill onClick={set(token.amount)}>Max</ClickablePill>
+				<ClickablePill onClick={set(token.amount)}>{t("tokenDrawer.action.max")}</ClickablePill>
 			</div>
 			<span className="text-sm text-muted-foreground">
 				{token.amount} {token.symbol}
@@ -280,6 +282,7 @@ export function TokenBox({
 	genAddress?: boolean;
 	onToggleGenAddress?: () => void;
 }) {
+	const t = useTranslations();
 	const [open, setOpen] = useState(false);
 	const [query, setQuery] = useState("");
 	const searchRef = useRef<HTMLInputElement>(null);
@@ -288,7 +291,8 @@ export function TokenBox({
 	// "To" address field + QR scanner state.
 	const [address, setAddress] = useState("");
 	const [scanning, setScanning] = useState(false);
-	const label = variant === "from" ? "From" : "To";
+	const label =
+		variant === "from" ? t("tokenDrawer.variant.from") : t("tokenDrawer.variant.to");
 
 	// Keyboard shortcut (web): ⌘F / Ctrl+F opens the From search, ⌘K / Ctrl+K
 	// opens the To search.
@@ -327,6 +331,7 @@ export function TokenBox({
 
 	const selectToken = (t: TokenRow) => {
 		setOpen(false);
+		setQuery("");
 		onSelect?.(t);
 	};
 
@@ -389,7 +394,7 @@ export function TokenBox({
 					<HapticButton
 						type="button"
 						onClick={() => setOpen(true)}
-						aria-label={`Select ${label} token`}
+						aria-label={t("tokenDrawer.trigger.selectTokenAriaLabel", { label })}
 						wrapperClassName="grid size-full"
 						className="size-full cursor-pointer"
 					/>
@@ -421,7 +426,7 @@ export function TokenBox({
 								transition={{ duration: 0.2, ease: "easeOut" }}
 							>
 								<span className="block text-5xl font-semibold text-muted-foreground">
-									{label}...
+									{t("tokenDrawer.placeholder.label", { label })}
 								</span>
 								<kbd className="pointer-events-none absolute right-0 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
 									<span className="text-xs">⌘</span>
@@ -470,46 +475,62 @@ export function TokenBox({
 								/>
 							)
 						) : (
-							scanning ? (
-								<div className="flex flex-col gap-3">
-									<QrScanner
-										onScan={(addr) => {
-											setAddress(addr);
-											setScanning(false);
-										}}
-									/>
-									<HapticButton
-										type="button"
-										onClick={() => setScanning(false)}
-										wrapperClassName="block w-full"
-										className="h-12 w-full rounded-2xl bg-foreground/[0.06] text-base font-semibold text-foreground transition-colors hover:bg-foreground/10"
+							<AnimatePresence mode="wait" initial={false}>
+								{scanning ? (
+									<motion.div
+										key="scanner"
+										initial={{ opacity: 0, height: 0 }}
+										animate={{ opacity: 1, height: "auto" }}
+										exit={{ opacity: 0, height: 0 }}
+										transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+										className="flex flex-col gap-3 overflow-hidden"
 									>
-										Cancel
-									</HapticButton>
-								</div>
-							) : (
-								<div className="flex gap-2">
-									<input
-										type="text"
-										value={address}
-										onChange={(e) => setAddress(e.target.value)}
-										placeholder="Enter or paste address"
-										autoComplete="off"
-										autoCorrect="off"
-										spellCheck={false}
-										className="h-[3.25rem] min-w-0 flex-1 rounded-2xl bg-foreground/[0.06] px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-									/>
-									<HapticButton
-										type="button"
-										onClick={() => setScanning(true)}
-										aria-label="Scan QR code"
-										wrapperClassName="grid size-[3.25rem] shrink-0"
-										className="flex size-full items-center justify-center rounded-2xl bg-foreground/[0.06] text-muted-foreground transition-colors hover:bg-foreground/10"
+										<QrScanner
+											onScan={(addr) => {
+												setAddress(addr);
+												setScanning(false);
+											}}
+										/>
+										<HapticButton
+											type="button"
+											onClick={() => setScanning(false)}
+											wrapperClassName="block w-full"
+											className="h-12 w-full rounded-2xl bg-foreground/[0.06] text-base font-semibold text-foreground transition-colors hover:bg-foreground/10"
+										>
+											{t("tokenDrawer.action.cancel")}
+										</HapticButton>
+									</motion.div>
+								) : (
+									<motion.div
+										key="input"
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.18, ease: "easeOut" }}
+										className="flex gap-2"
 									>
-										<Scan className="size-5" />
-									</HapticButton>
-								</div>
-							)
+										<input
+											type="text"
+											value={address}
+											onChange={(e) => setAddress(e.target.value)}
+											placeholder={t("tokenDrawer.input.addressPlaceholder")}
+											autoComplete="off"
+											autoCorrect="off"
+											spellCheck={false}
+											className="h-[3.25rem] min-w-0 flex-1 rounded-2xl bg-foreground/[0.06] px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+										/>
+										<HapticButton
+											type="button"
+											onClick={() => setScanning(true)}
+											aria-label={t("tokenDrawer.action.scanQrAriaLabel")}
+											wrapperClassName="grid size-[3.25rem] shrink-0"
+											className="flex size-full items-center justify-center rounded-2xl bg-foreground/[0.06] text-muted-foreground transition-colors hover:bg-foreground/10"
+										>
+											<Scan className="size-5" />
+										</HapticButton>
+									</motion.div>
+								)}
+							</AnimatePresence>
 						)}
 
 						<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3">
@@ -519,7 +540,7 @@ export function TokenBox({
 								type="text"
 								value={query}
 								onChange={(e) => setQuery(e.target.value)}
-								placeholder="Search name or paste address"
+								placeholder={t("tokenDrawer.input.searchPlaceholder")}
 								className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
 							/>
 						</div>
@@ -541,12 +562,12 @@ export function TokenBox({
 										<img
 											src={chainIcon(f.chainId)}
 											alt=""
-											className="size-6 rounded-full object-cover"
+											className="size-6 rounded-full bg-background object-cover"
 										/>
 									) : (
 										<span className="size-6 rounded-full border-2 border-current" />
 									)}
-									{f.label}
+									{f.label === "All" ? t("tokenDrawer.filter.all") : f.label}
 								</button>
 							))}
 						</div>
@@ -558,37 +579,37 @@ export function TokenBox({
 					>
 						{filtered.length === 0 && (
 							<p className="py-8 text-center text-sm text-muted-foreground">
-								No tokens found
+								{t("tokenDrawer.empty.noTokensFound")}
 							</p>
 						)}
-						{filtered.map((t, i) => {
-							const isSelected = selected !== null && tokenKey(selected) === tokenKey(t);
+						{filtered.map((token, i) => {
+							const isSelected = selected !== null && tokenKey(selected) === tokenKey(token);
 							return (
 								<HapticButton
-									key={tokenKey(t)}
+									key={tokenKey(token)}
 									type="button"
 									data-active={i === activeIndex}
 									wrapperClassName="mb-2 block w-full"
-									onClick={() => selectToken(t)}
+									onClick={() => selectToken(token)}
 									className={cn(
 										"flex w-full cursor-pointer items-center gap-3 rounded-full py-2 pl-2 pr-4 text-left transition-colors",
 										i === activeIndex
 											? "bg-foreground/10"
-											: "bg-foreground/[0.06] hover:bg-foreground/10",
+											: "hover:bg-foreground/10",
 										isSelected && "opacity-50",
 									)}
 								>
-									<TokenIcon token={t} />
+									<TokenIcon token={token} />
 									<div className="min-w-0 flex-1">
-										<p className="font-semibold text-foreground">{t.name}</p>
+										<p className="font-semibold text-foreground">{token.name}</p>
 										<p className="text-sm text-muted-foreground">
-											{t.chain}
-											{isSelected ? " · selected" : ""}
+											{token.chain}
+											{isSelected ? t("tokenDrawer.row.selectedSuffix") : ""}
 										</p>
 									</div>
 									<div className="text-right">
-										<p className="font-semibold text-foreground">{t.amount}</p>
-										<p className="text-sm text-muted-foreground">{t.usd}</p>
+										<p className="font-semibold text-foreground">{token.amount}</p>
+										<p className="text-sm text-muted-foreground">{token.usd}</p>
 									</div>
 								</HapticButton>
 							);

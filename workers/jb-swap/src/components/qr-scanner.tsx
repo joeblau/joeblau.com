@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { extractEvmAddress } from "@/lib/evm-address";
+import { useTranslations } from "@/i18n/locale-provider";
 
 // ~7 Hz decode cadence. jsqrcode's `process` does a full ZXing-style
 // finder-pattern sweep at the full camera resolution — ~60-100 ms per pass
@@ -27,11 +28,14 @@ interface QrScannerProps {
 export function QrScanner({
 	onScan,
 	extract = extractEvmAddress,
-	unsupportedMessage = "Unsupported QR format — must contain an EVM address.",
+	unsupportedMessage,
 }: QrScannerProps) {
+	const t = useTranslations();
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const onScanRef = useRef(onScan);
 	const [error, setError] = useState<string | null>(null);
+	const resolvedUnsupportedMessage =
+		unsupportedMessage ?? t("qrScanner.unsupportedFormat");
 
 	useEffect(() => {
 		onScanRef.current = onScan;
@@ -86,7 +90,7 @@ export function QrScanner({
 						if (lastRejectedPayload !== raw) {
 							lastRejectedPayload = raw;
 							console.warn("Unsupported QR payload:", raw);
-							setError(unsupportedMessage);
+							setError(resolvedUnsupportedMessage);
 						}
 					} else {
 						setError(null);
@@ -139,7 +143,7 @@ export function QrScanner({
 				} catch (playErr) {
 					if (cancelled) return;
 					console.error("video.play() rejected:", playErr);
-					setError("Camera preview could not start. Tap to retry.");
+					setError(t("qrScanner.previewCouldNotStart"));
 					return;
 				}
 				if (cancelled) return;
@@ -156,7 +160,7 @@ export function QrScanner({
 				canvas = document.createElement("canvas");
 				ctx = canvas.getContext("2d", { willReadFrequently: true });
 				if (!ctx) {
-					setError("Canvas 2D context unavailable.");
+					setError(t("qrScanner.canvasUnavailable"));
 					return;
 				}
 
@@ -164,7 +168,7 @@ export function QrScanner({
 			} catch (err) {
 				if (cancelled) return;
 				console.error("QR scanner init failed:", err);
-				setError("Camera access denied. Please allow camera permissions.");
+				setError(t("qrScanner.cameraAccessDenied"));
 			}
 		})();
 

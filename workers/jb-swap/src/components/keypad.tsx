@@ -5,6 +5,7 @@ import { Delete } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { HapticButton } from "@/components/haptic-button";
+import { useTranslations } from "@/i18n/locale-provider";
 
 /**
  * Numeric keypad shown only in mobile-width viewports (below md). It animates
@@ -15,6 +16,7 @@ import { HapticButton } from "@/components/haptic-button";
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
 
 export function MobileKeypad({ onKey }: { onKey: (key: string) => void }) {
+	const t = useTranslations();
 	const [isMobile, setIsMobile] = useState(false);
 
 	useEffect(() => {
@@ -42,7 +44,7 @@ export function MobileKeypad({ onKey }: { onKey: (key: string) => void }) {
 								wrapperClassName="grid"
 								type="button"
 								onClick={() => onKey(k)}
-								aria-label={k === "back" ? "Delete" : k}
+								aria-label={k === "back" ? t("keypad.deleteKeyAriaLabel") : k}
 								className="flex h-14 items-center justify-center rounded-2xl text-2xl font-semibold text-foreground transition-colors active:bg-foreground/10"
 							>
 								{k === "back" ? <Delete className="size-6" /> : k}

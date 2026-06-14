@@ -40,4 +40,7 @@ next-env.d.ts
 # turbo
 .turbo
 
+# research / scratch
+rnd/
+
 

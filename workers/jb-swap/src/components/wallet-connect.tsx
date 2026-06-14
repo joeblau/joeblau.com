@@ -50,7 +50,7 @@ export function ConnectWalletControl({
 				>
 					<span
 						className={cn(
-							"inline-block size-4 rounded-full bg-white shadow transition-transform",
+							"inline-block size-4 rounded-full bg-background shadow transition-transform",
 							genAddress ? "translate-x-[18px]" : "translate-x-0.5",
 						)}
 					/>

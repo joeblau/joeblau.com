@@ -11,7 +11,7 @@ import {
 	type SegmentOption,
 } from "@/components/segmented-control";
 import { ThemeSegmentedControl } from "@/components/theme-segmented-control";
-import { usePersistentState } from "@/lib/use-persistent-state";
+import { useLocale, useTranslations } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 type View = "menu" | "language";
@@ -42,7 +42,8 @@ export function AppMenu({
 	denomination: Denomination;
 	onDenominationChange: (value: Denomination) => void;
 }) {
-	const [language, setLanguage] = usePersistentState("jbswap:language", "en");
+	const t = useTranslations();
+	const { locale, setLocale } = useLocale();
 	const [view, setView] = useState<View>("menu");
 	// +1 = forward push (slide in from the right), -1 = back pop.
 	const [direction, setDirection] = useState(1);
@@ -69,7 +70,7 @@ export function AppMenu({
 			<Drawer.Trigger asChild>
 				<button
 					type="button"
-					aria-label="Menu"
+					aria-label={t("menu.triggerAriaLabel")}
 					className={cn(
 						"flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80 active:scale-95",
 						className,
@@ -92,7 +93,7 @@ export function AppMenu({
 								{view === "language" && (
 									<button
 										type="button"
-										aria-label="Back"
+										aria-label={t("menu.backAriaLabel")}
 										onClick={() => go("menu")}
 										className="-ml-2 flex size-9 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
 									>
@@ -100,7 +101,9 @@ export function AppMenu({
 									</button>
 								)}
 								<Drawer.Title className="text-2xl font-bold text-foreground">
-									{view === "language" ? "Language" : "Menu"}
+									{view === "language"
+										? t("menu.titleLanguage")
+										: t("menu.titleMenu")}
 								</Drawer.Title>
 							</div>
 							<Drawer.Close className="flex size-9 cursor-pointer items-center justify-center rounded-full bg-foreground/10 text-muted-foreground transition-colors hover:bg-foreground/15">
@@ -111,21 +114,27 @@ export function AppMenu({
 						<ResizablePanel activeKey={view} direction={direction}>
 							{view === "language" ? (
 								<LanguagePanel
-									value={language}
+									value={locale}
 									onSelect={(code) => {
-										setLanguage(code);
+										setLocale(code);
 										go("menu");
 									}}
 								/>
 							) : (
 								<div className="flex flex-col gap-4">
 									<LanguageRow
-										value={language}
+										value={locale}
 										onOpen={() => go("language")}
 									/>
 									<ThemeSegmentedControl />
 									<SegmentedControl
-										options={DENOMINATION_OPTIONS}
+										options={DENOMINATION_OPTIONS.map((option) => ({
+											...option,
+											label:
+												option.value === "usd"
+													? t("menu.denominationDollars")
+													: t("menu.denominationUnits"),
+										}))}
 										value={denomination}
 										onChange={onDenominationChange}
 										layoutId="denomination-segment-pill"
