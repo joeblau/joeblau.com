@@ -9,13 +9,16 @@ import {
 	type SegmentOption,
 } from "@/components/segmented-control";
 import { useThemeToggle } from "@/components/skiper26";
+import { useTranslations } from "@/i18n/locale-provider";
 
 type ThemeOption = "system" | "light" | "dark";
 
-const OPTIONS: SegmentOption<ThemeOption>[] = [
-	{ value: "system", label: "System", icon: Monitor },
-	{ value: "light", label: "Light", icon: Sun },
-	{ value: "dark", label: "Dark", icon: Moon },
+const OPTIONS: (Omit<SegmentOption<ThemeOption>, "label"> & {
+	labelKey: string;
+})[] = [
+	{ value: "system", labelKey: "theme.system", icon: Monitor },
+	{ value: "light", labelKey: "theme.light", icon: Sun },
+	{ value: "dark", labelKey: "theme.dark", icon: Moon },
 ];
 
 /**
@@ -25,6 +28,7 @@ const OPTIONS: SegmentOption<ThemeOption>[] = [
  * chosen theme.
  */
 export function ThemeSegmentedControl({ className }: { className?: string }) {
+	const t = useTranslations();
 	const { theme } = useTheme();
 	const { setCrazySystemTheme, setCrazyLightTheme, setCrazyDarkTheme } =
 		useThemeToggle({ variant: "circle", start: "center", blur: true });
@@ -44,7 +48,10 @@ export function ThemeSegmentedControl({ className }: { className?: string }) {
 
 	return (
 		<SegmentedControl
-			options={OPTIONS}
+			options={OPTIONS.map(({ labelKey, ...option }) => ({
+				...option,
+				label: t(labelKey),
+			}))}
 			value={active}
 			onChange={select}
 			layoutId="theme-segment-pill"

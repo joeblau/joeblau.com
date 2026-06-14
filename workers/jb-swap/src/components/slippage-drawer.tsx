@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { Drawer } from "vaul";
 
+import { useTranslations } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -30,6 +31,8 @@ export function SlippageDrawer({
 	value: number;
 	onChange: (v: number) => void;
 }) {
+	const t = useTranslations();
+
 	const handleCustom = (raw: string) => {
 		const pct = Number.parseFloat(raw);
 		if (Number.isFinite(pct) && pct >= 0) onChange(pct / 100);
@@ -48,7 +51,7 @@ export function SlippageDrawer({
 					<div className="flex flex-col gap-5 px-3 pb-8 pt-4">
 						<div className="flex items-center justify-between">
 							<Drawer.Title className="text-2xl font-bold text-foreground">
-								Slippage
+								{t("slippage.title")}
 							</Drawer.Title>
 							<Drawer.Close className="flex size-9 cursor-pointer items-center justify-center rounded-full bg-foreground/10 text-muted-foreground transition-colors hover:bg-foreground/15">
 								<X className="size-5" />
@@ -84,7 +87,7 @@ export function SlippageDrawer({
 								step="0.1"
 								value={Number((value * 100).toFixed(4))}
 								onChange={(e) => handleCustom(e.target.value)}
-								placeholder="Custom"
+								placeholder={t("slippage.customPlaceholder")}
 								className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
 							/>
 							<span className="shrink-0 text-base font-semibold text-muted-foreground">

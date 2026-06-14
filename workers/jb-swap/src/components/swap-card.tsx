@@ -11,20 +11,21 @@ import { HapticButton } from "@/components/haptic-button";
 import { MobileKeypad } from "@/components/keypad";
 import { SlippageDrawer } from "@/components/slippage-drawer";
 import { price, TokenBox, type TokenRow } from "@/components/token-drawer";
+import { useTranslations } from "@/i18n/locale-provider";
 import { usePersistentState } from "@/lib/use-persistent-state";
 import { cn } from "@/lib/utils";
 
 /** Map the persisted denomination setting to an amount-input display mode. */
 const modeForDenomination = (d: Denomination) => (d === "usd" ? "usd" : "token");
 
-/** Same asset + chain → Send; different asset, same chain → Swap; different asset + chain → Bridge. */
+/** Same asset + chain → send; different asset, same chain → swap; different asset + chain → bridge. */
 function getActionLabel(from: TokenRow | null, to: TokenRow | null) {
-	if (!from || !to) return "Send";
+	if (!from || !to) return "send";
 	const differentAsset = from.symbol !== to.symbol;
 	const sameChain = from.chainId === to.chainId;
-	if (differentAsset && sameChain) return "Swap";
-	if (differentAsset && !sameChain) return "Bridge";
-	return "Send";
+	if (differentAsset && sameChain) return "swap";
+	if (differentAsset && !sameChain) return "bridge";
+	return "send";
 }
 
 /** Quote constant — must match the "Fee $0.25" shown in SelectedMeta. */
@@ -117,12 +118,13 @@ function AmountInput({
 	muted?: boolean;
 	sizeClassName?: string;
 }) {
+	const t = useTranslations();
 	const dot = value.indexOf(".");
 	const fractionDigits = dot === -1 ? 0 : Math.min(value.length - dot - 1, 8);
 	return (
 		<div
 			role="textbox"
-			aria-label="Amount"
+			aria-label={t("swapCard.amountInput.ariaLabel")}
 			tabIndex={0}
 			className="cursor-text overflow-hidden rounded-lg outline-none"
 		>
@@ -146,6 +148,7 @@ function AmountInput({
 }
 
 export function SwapCard() {
+	const t = useTranslations();
 	// Default amount denomination, set in the menu and persisted. It seeds the
 	// input modes below and is the single source of truth shared with AppMenu.
 	const [denomination, setDenomination] = usePersistentState<Denomination>(
@@ -186,12 +189,14 @@ export function SwapCard() {
 		fromToken !== null && toToken !== null && fromUnits > 0 && !insufficient;
 	const actionLabel =
 		fromToken === null || toToken === null
-			? "Select a token"
+			? t("swapCard.actionLabel.selectToken")
 			: fromUnits <= 0
-				? "Enter an amount"
+				? t("swapCard.actionLabel.enterAmount")
 				: insufficient
-					? `Insufficient ${fromToken.symbol} balance`
-					: action;
+					? t("swapCard.actionLabel.insufficientBalance", {
+							symbol: fromToken.symbol,
+						})
+					: t(`swapCard.action.${action}`);
 
 	// Flip a field's denomination. For FROM, convert the editable string so the
 	// displayed value stays equal across the toggle.
@@ -382,7 +387,7 @@ export function SwapCard() {
 							? "text-muted-foreground"
 							: "cursor-not-allowed bg-secondary/40 text-muted-foreground",
 					)}
-					aria-label="Swap assets"
+					aria-label={t("swapCard.swapDirection.ariaLabel")}
 				>
 					<ArrowUpDown className="size-4" />
 				</HapticButton>
@@ -433,13 +438,13 @@ export function SwapCard() {
 					disabled={!canSwap || submitting}
 					className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-secondary/40 disabled:text-muted-foreground disabled:hover:bg-secondary/40 disabled:active:scale-100"
 				>
-					{submitting ? "Confirming…" : actionLabel}
+					{submitting ? t("swapCard.submit.confirming") : actionLabel}
 				</HapticButton>
 				<HapticButton
 					type="button"
 					onClick={resetForm}
 					disabled={isPristine || submitting}
-					aria-label="Reset"
+					aria-label={t("swapCard.reset.ariaLabel")}
 					className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80 active:scale-95 disabled:cursor-not-allowed disabled:bg-secondary/40 disabled:text-muted-foreground disabled:hover:bg-secondary/40 disabled:active:scale-100"
 				>
 					<RotateCcw className="size-5" />

@@ -4,6 +4,7 @@ import { Check, ChevronRight, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { HapticButton } from "@/components/haptic-button";
+import { useTranslations } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -82,6 +83,7 @@ export function LanguageRow({
 	value: string;
 	onOpen: () => void;
 }) {
+	const t = useTranslations();
 	const current = languageFor(value);
 	return (
 		<HapticButton
@@ -95,7 +97,7 @@ export function LanguageRow({
 				alt={current.englishName}
 				className="size-9"
 			/>
-			<span className="flex-1">Language</span>
+			<span className="flex-1">{t("language.row.label")}</span>
 			<span className="text-muted-foreground">{current.name}</span>
 			<ChevronRight className="size-5 shrink-0 text-muted-foreground" />
 		</HapticButton>
@@ -110,6 +112,7 @@ export function LanguagePanel({
 	value: string;
 	onSelect: (code: string) => void;
 }) {
+	const t = useTranslations();
 	const [query, setQuery] = useState("");
 	const searchRef = useRef<HTMLInputElement>(null);
 	const current = languageFor(value);
@@ -117,8 +120,8 @@ export function LanguagePanel({
 	// Focus the search on web only (skip mobile to avoid popping the keyboard).
 	useEffect(() => {
 		if (!window.matchMedia("(min-width: 768px)").matches) return;
-		const t = setTimeout(() => searchRef.current?.focus(), 150);
-		return () => clearTimeout(t);
+		const timer = setTimeout(() => searchRef.current?.focus(), 150);
+		return () => clearTimeout(timer);
 	}, []);
 
 	const filtered = LANGUAGES.filter((l) => matches(query, l));
@@ -132,7 +135,7 @@ export function LanguagePanel({
 					type="text"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
-					placeholder="Search languages"
+					placeholder={t("language.search.placeholder")}
 					className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
 				/>
 			</div>
@@ -140,7 +143,7 @@ export function LanguagePanel({
 			<div className="scrollbar-subtle -mx-1 max-h-[50vh] overflow-y-auto px-1">
 				{filtered.length === 0 && (
 					<p className="py-8 text-center text-sm text-muted-foreground">
-						No languages found
+						{t("language.empty.noResults")}
 					</p>
 				)}
 				{filtered.map((l) => {
@@ -149,11 +152,11 @@ export function LanguagePanel({
 						<HapticButton
 							key={l.code}
 							type="button"
-							wrapperClassName="block w-full"
+							wrapperClassName="mb-2 block w-full"
 							onClick={() => onSelect(l.code)}
-							className="flex w-full cursor-pointer items-center gap-3 rounded-xl py-3 text-left transition-colors hover:bg-foreground/[0.04]"
+							className="flex w-full cursor-pointer items-center gap-3 rounded-full py-2 pl-2 pr-4 text-left transition-colors hover:bg-foreground/10"
 						>
-							<FlagCircle flag={l.flag} alt={l.englishName} />
+							<FlagCircle flag={l.flag} alt={l.englishName} className="size-11" />
 							<div className="min-w-0 flex-1">
 								<p className="font-semibold text-foreground">{l.name}</p>
 								<p className="text-sm text-muted-foreground">{l.englishName}</p>
