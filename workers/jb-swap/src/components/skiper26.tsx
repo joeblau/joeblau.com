@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { HapticButton } from "@/components/haptic-button";
 import { cn } from "@/lib/utils";
 
 // ///////////////////////////////////////////////////////////////////////////
@@ -175,7 +176,7 @@ export const ThemeToggleButton = ({
   });
 
   return (
-    <button
+    <HapticButton
       type="button"
       className={cn(
         "size-10 cursor-pointer rounded-full bg-black p-0 transition-all duration-300 active:scale-95",
@@ -206,7 +207,7 @@ export const ThemeToggleButton = ({
           fill="white"
         />
       </svg>
-    </button>
+    </HapticButton>
   );
 };
 
