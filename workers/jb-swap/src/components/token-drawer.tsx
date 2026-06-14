@@ -125,7 +125,7 @@ function TokenIcon({ token }: { token: TokenRow }) {
 				alt={token.name}
 				className="size-11 rounded-full bg-foreground/[0.06] object-cover"
 			/>
-			<ChainBadge chainId={token.chainId} className="absolute -bottom-0.5 -right-0.5" />
+			<ChainBadge chainId={token.chainId} className="absolute bottom-0 right-0" />
 		</div>
 	);
 }
@@ -568,11 +568,13 @@ export function TokenBox({
 									key={tokenKey(t)}
 									type="button"
 									data-active={i === activeIndex}
-									wrapperClassName="block w-full"
+									wrapperClassName="mb-2 block w-full"
 									onClick={() => selectToken(t)}
 									className={cn(
-										"flex w-full cursor-pointer items-center gap-3 rounded-xl py-3 text-left transition-colors hover:bg-foreground/[0.04]",
-										i === activeIndex && "bg-foreground/[0.06]",
+										"flex w-full cursor-pointer items-center gap-3 rounded-full py-2 pl-2 pr-4 text-left transition-colors",
+										i === activeIndex
+											? "bg-foreground/10"
+											: "bg-foreground/[0.06] hover:bg-foreground/10",
 										isSelected && "opacity-50",
 									)}
 								>
