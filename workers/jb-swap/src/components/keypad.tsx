@@ -43,7 +43,7 @@ export function MobileKeypad({ onKey }: { onKey: (key: string) => void }) {
 								type="button"
 								onClick={() => onKey(k)}
 								aria-label={k === "back" ? "Delete" : k}
-								className="flex h-16 items-center justify-center rounded-2xl text-2xl font-semibold text-foreground transition-colors active:bg-foreground/10"
+								className="flex h-14 items-center justify-center rounded-2xl text-2xl font-semibold text-foreground transition-colors active:bg-foreground/10"
 							>
 								{k === "back" ? <Delete className="size-6" /> : k}
 							</HapticButton>

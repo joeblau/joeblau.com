@@ -230,7 +230,7 @@ export function SwapCard() {
 			transition={{ duration: 0.4, ease: "easeOut" }}
 		>
 			{/* You pay */}
-			<section className="rounded-3xl bg-card px-4 pb-6 pt-4">
+			<section className="rounded-3xl bg-card px-4 pb-3 pt-4">
 				<TokenBox
 					variant="from"
 					onSelect={setFromToken}
@@ -273,7 +273,7 @@ export function SwapCard() {
 			</div>
 
 			{/* You receive */}
-			<section className="rounded-3xl bg-card px-4 pb-4 pt-6">
+			<section className="rounded-3xl bg-card px-4 pb-0 pt-6">
 				<TokenBox
 					variant="to"
 					onSelect={setToToken}
