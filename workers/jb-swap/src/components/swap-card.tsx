@@ -265,7 +265,7 @@ export function SwapCard() {
 						background:
 							"linear-gradient(hsl(var(--foreground) / 0.07), hsl(var(--foreground) / 0.07)), hsl(var(--card))",
 					}}
-					className="flex size-8 items-center justify-center rounded-full text-muted-foreground ring-1 ring-background"
+					className="flex size-8 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background"
 					aria-label="Swap direction"
 				>
 					<ArrowUpDown className="size-4" />
@@ -303,7 +303,7 @@ export function SwapCard() {
 			{/* Action button with the theme toggle to its left. */}
 			<div className="mt-2 flex items-center gap-2">
 				<div className="flex shrink-0">
-					<ThemeToggleButton2 className="size-12 p-2" />
+					<ThemeToggleButton2 className="size-12 bg-secondary p-2 text-secondary-foreground" />
 				</div>
 				<HapticButton
 					wrapperClassName="grid flex-1"
