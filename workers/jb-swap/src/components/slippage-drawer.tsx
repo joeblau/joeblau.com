@@ -45,7 +45,7 @@ export function SlippageDrawer({
 				>
 					<div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-foreground/20" />
 
-					<div className="flex flex-col gap-5 px-5 pb-8 pt-4">
+					<div className="flex flex-col gap-5 px-3 pb-8 pt-4">
 						<div className="flex items-center justify-between">
 							<Drawer.Title className="text-2xl font-bold text-foreground">
 								Slippage

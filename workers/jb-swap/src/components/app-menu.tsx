@@ -1,15 +1,30 @@
 "use client";
 
-import { ChevronLeft, Menu, X } from "lucide-react";
+import { ChevronLeft, Coins, DollarSign, Menu, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Drawer } from "vaul";
 
 import { LanguagePanel, LanguageRow } from "@/components/language-drawer";
 import { ResizablePanel } from "@/components/resizable-panel";
+import {
+	SegmentedControl,
+	type SegmentOption,
+} from "@/components/segmented-control";
 import { ThemeSegmentedControl } from "@/components/theme-segmented-control";
+import { usePersistentState } from "@/lib/use-persistent-state";
 import { cn } from "@/lib/utils";
 
 type View = "menu" | "language";
+
+export type Denomination = "usd" | "units";
+
+/** localStorage key for the default amount denomination. */
+export const DENOMINATION_KEY = "jbswap:denomination";
+
+const DENOMINATION_OPTIONS: SegmentOption<Denomination>[] = [
+	{ value: "usd", label: "Dollars", icon: DollarSign },
+	{ value: "units", label: "Units", icon: Coins },
+];
 
 /**
  * Bottom-row menu button. Opens a Vaul bottom-sheet (matching the token /
@@ -18,8 +33,16 @@ type View = "menu" | "language";
  * sheet; the body springs its height and slides between views — a Family-wallet
  * style morph rather than a hard snap.
  */
-export function AppMenu({ className }: { className?: string }) {
-	const [language, setLanguage] = useState("en");
+export function AppMenu({
+	className,
+	denomination,
+	onDenominationChange,
+}: {
+	className?: string;
+	denomination: Denomination;
+	onDenominationChange: (value: Denomination) => void;
+}) {
+	const [language, setLanguage] = usePersistentState("jbswap:language", "en");
 	const [view, setView] = useState<View>("menu");
 	// +1 = forward push (slide in from the right), -1 = back pop.
 	const [direction, setDirection] = useState(1);
@@ -63,7 +86,7 @@ export function AppMenu({ className }: { className?: string }) {
 				>
 					<div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-foreground/20" />
 
-					<div className="flex flex-col gap-4 px-5 pb-8 pt-4">
+					<div className="flex flex-col gap-4 px-3 pb-8 pt-4">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-1">
 								{view === "language" && (
@@ -101,6 +124,12 @@ export function AppMenu({ className }: { className?: string }) {
 										onOpen={() => go("language")}
 									/>
 									<ThemeSegmentedControl />
+									<SegmentedControl
+										options={DENOMINATION_OPTIONS}
+										value={denomination}
+										onChange={onDenominationChange}
+										layoutId="denomination-segment-pill"
+									/>
 								</div>
 							)}
 						</ResizablePanel>

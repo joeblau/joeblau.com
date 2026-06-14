@@ -1,26 +1,28 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-import { HapticButton } from "@/components/haptic-button";
+import {
+	SegmentedControl,
+	type SegmentOption,
+} from "@/components/segmented-control";
 import { useThemeToggle } from "@/components/skiper26";
-import { cn } from "@/lib/utils";
 
 type ThemeOption = "system" | "light" | "dark";
 
-const OPTIONS: { value: ThemeOption; label: string; icon: typeof Sun }[] = [
+const OPTIONS: SegmentOption<ThemeOption>[] = [
 	{ value: "system", label: "System", icon: Monitor },
 	{ value: "light", label: "Light", icon: Sun },
 	{ value: "dark", label: "Dark", icon: Moon },
 ];
 
 /**
- * System / Light / Dark segmented control. A single pill slides between the
- * three segments via a shared `layoutId`, while each tap runs the skiper26
- * View-Transition theme swap so the whole page wipes to the chosen theme.
+ * System / Light / Dark segmented control. Renders the shared SegmentedControl
+ * (so it stays visually identical to the other menu segments), while each tap
+ * runs the skiper26 View-Transition theme swap so the whole page wipes to the
+ * chosen theme.
  */
 export function ThemeSegmentedControl({ className }: { className?: string }) {
 	const { theme } = useTheme();
@@ -41,42 +43,12 @@ export function ThemeSegmentedControl({ className }: { className?: string }) {
 	};
 
 	return (
-		<div
-			className={cn(
-				"flex items-center gap-1 rounded-full bg-foreground/[0.06] p-1",
-				className,
-			)}
-		>
-			{OPTIONS.map(({ value, label, icon: Icon }) => {
-				const isActive = active === value;
-				return (
-					<HapticButton
-						key={value}
-						type="button"
-						wrapperClassName="grid flex-1"
-						onClick={() => select(value)}
-						aria-pressed={isActive}
-						className={cn(
-							"relative flex items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-colors",
-							isActive
-								? "text-foreground"
-								: "text-muted-foreground hover:text-foreground",
-						)}
-					>
-						{isActive && (
-							<motion.span
-								layoutId="theme-segment-pill"
-								className="absolute inset-0 rounded-full bg-background shadow-sm"
-								transition={{ type: "spring", stiffness: 400, damping: 32 }}
-							/>
-						)}
-						<span className="relative flex items-center gap-2">
-							<Icon className="size-4" />
-							{label}
-						</span>
-					</HapticButton>
-				);
-			})}
-		</div>
+		<SegmentedControl
+			options={OPTIONS}
+			value={active}
+			onChange={select}
+			layoutId="theme-segment-pill"
+			className={className}
+		/>
 	);
 }

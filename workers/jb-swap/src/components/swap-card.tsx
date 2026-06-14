@@ -6,12 +6,16 @@ import { ArrowUpDown, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { AppleBorderGradient } from "@/components/apple-border-gradient";
-import { AppMenu } from "@/components/app-menu";
+import { AppMenu, type Denomination, DENOMINATION_KEY } from "@/components/app-menu";
 import { HapticButton } from "@/components/haptic-button";
 import { MobileKeypad } from "@/components/keypad";
 import { SlippageDrawer } from "@/components/slippage-drawer";
 import { price, TokenBox, type TokenRow } from "@/components/token-drawer";
+import { usePersistentState } from "@/lib/use-persistent-state";
 import { cn } from "@/lib/utils";
+
+/** Map the persisted denomination setting to an amount-input display mode. */
+const modeForDenomination = (d: Denomination) => (d === "usd" ? "usd" : "token");
 
 /** Same asset + chain → Send; different asset, same chain → Swap; different asset + chain → Bridge. */
 function getActionLabel(from: TokenRow | null, to: TokenRow | null) {
@@ -26,16 +30,46 @@ function getActionLabel(from: TokenRow | null, to: TokenRow | null) {
 /** Quote constant — must match the "Fee $0.25" shown in SelectedMeta. */
 const FEE_USD = 0.25;
 
-function formatUsd(n: number) {
-	return `$${n.toLocaleString("en-US", {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})}`;
-}
-
 /** Trim a number to a clean string (drops trailing zeros, caps at 8 decimals). */
 function trim(n: number) {
 	return String(Number(n.toFixed(8)));
+}
+
+/**
+ * The animated value inside a conversion Pill. In "token" mode the field is
+ * entered in token units so the pill shows the USD equivalent ($, 2dp); in
+ * "usd" mode it shows the token amount + symbol (up to 8dp, no grouping).
+ * NumberFlow animates digit changes the same way the main AmountInput does.
+ */
+function ConversionValue({
+	mode,
+	usd,
+	units,
+	symbol,
+}: {
+	mode: "token" | "usd";
+	usd: number;
+	units: number;
+	symbol: string;
+}) {
+	if (mode === "token") {
+		return (
+			<NumberFlow
+				value={usd}
+				prefix="$"
+				format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+				className="overflow-hidden [--number-flow-mask-height:0px]"
+			/>
+		);
+	}
+	return (
+		<NumberFlow
+			value={units}
+			suffix={symbol ? ` ${symbol}` : ""}
+			format={{ maximumFractionDigits: 8, useGrouping: false }}
+			className="overflow-hidden [--number-flow-mask-height:0px]"
+		/>
+	);
 }
 
 function Pill({
@@ -90,7 +124,7 @@ function AmountInput({
 			role="textbox"
 			aria-label="Amount"
 			tabIndex={0}
-			className="cursor-text rounded-lg outline-none"
+			className="cursor-text overflow-hidden rounded-lg outline-none"
 		>
 			<NumberFlow
 				value={Number(value) || 0}
@@ -112,17 +146,26 @@ function AmountInput({
 }
 
 export function SwapCard() {
+	// Default amount denomination, set in the menu and persisted. It seeds the
+	// input modes below and is the single source of truth shared with AppMenu.
+	const [denomination, setDenomination] = usePersistentState<Denomination>(
+		DENOMINATION_KEY,
+		"usd",
+	);
+	const defaultMode = modeForDenomination(denomination);
+
 	const [fromAmount, setFromAmount] = useState("0");
 	const [fromToken, setFromToken] = useState<TokenRow | null>(null);
 	const [toToken, setToToken] = useState<TokenRow | null>(null);
-	const [fromMode, setFromMode] = useState<"token" | "usd">("token");
-	const [toMode, setToMode] = useState<"token" | "usd">("token");
+	const [fromMode, setFromMode] = useState<"token" | "usd">(defaultMode);
+	const [toMode, setToMode] = useState<"token" | "usd">(defaultMode);
 	const [slippage, setSlippage] = useState(0.005);
 	const [slippageOpen, setSlippageOpen] = useState(false);
 	const [connected, setConnected] = useState(false);
 	const [genAddress, setGenAddress] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const action = getActionLabel(fromToken, toToken);
+	const canFlip = fromToken !== null && toToken !== null;
 
 	// Quote is always driven by the FROM token units, regardless of display mode.
 	const fromPrice = fromToken ? price(fromToken) : 0;
@@ -164,6 +207,18 @@ export function SwapCard() {
 	const toggleToMode = () =>
 		setToMode((m) => (m === "token" ? "usd" : "token"));
 
+	// Changing the default denomination in the menu switches BOTH inputs at once.
+	// Convert the editable FROM amount so its displayed value stays equivalent.
+	const handleDenominationChange = (next: Denomination) => {
+		setDenomination(next);
+		const mode = modeForDenomination(next);
+		if (mode !== fromMode) {
+			setFromAmount(trim(mode === "usd" ? fromUsd : fromUnits));
+		}
+		setFromMode(mode);
+		setToMode(mode);
+	};
+
 	// Flip only swaps the chosen assets/chains; the entered amount stays put and
 	// the quote re-derives. No-op until both sides have a token.
 	const swapTokens = () => {
@@ -172,13 +227,23 @@ export function SwapCard() {
 		setToToken(fromToken);
 	};
 
-	// Clear tokens, amount, and denomination back to the initial state.
+	// Apply the default denomination to both inputs on load and whenever the
+	// setting changes. Skip while an amount is being entered so a typed value
+	// isn't silently reinterpreted (it'll take effect on the next reset).
+	useEffect(() => {
+		if (Number(fromAmount) !== 0) return;
+		setFromMode(defaultMode);
+		setToMode(defaultMode);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [defaultMode]);
+
+	// Clear tokens, amount, and denomination back to the default state.
 	const resetForm = () => {
 		setFromAmount("0");
 		setFromToken(null);
 		setToToken(null);
-		setFromMode("token");
-		setToMode("token");
+		setFromMode(defaultMode);
+		setToMode(defaultMode);
 	};
 	const isPristine =
 		fromToken === null && toToken === null && Number(fromAmount) === 0;
@@ -280,9 +345,12 @@ export function SwapCard() {
 					/>
 					<Pill onClick={toggleFromMode}>
 						<span className="opacity-50">=</span>{" "}
-						{fromMode === "token"
-							? formatUsd(fromUsd)
-							: `${trim(fromUnits)} ${fromToken?.symbol ?? ""}`}
+						<ConversionValue
+							mode={fromMode}
+							usd={fromUsd}
+							units={fromUnits}
+							symbol={fromToken?.symbol ?? ""}
+						/>
 						<ArrowUpDown className="size-3.5" />
 					</Pill>
 				</div>
@@ -290,15 +358,30 @@ export function SwapCard() {
 
 			{/* Swap direction */}
 			<div className="relative z-10 mx-auto -my-3 flex w-fit">
+				{/* Filled disc behind the button — breaks the seam line and is sized
+				    to include what used to be the 2px ring (size-8 + 2px each side). */}
+				<span
+					aria-hidden
+					className="absolute left-1/2 top-1/2 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
+				/>
 				<HapticButton
 					type="button"
 					onClick={swapTokens}
-					disabled={fromToken === null || toToken === null}
-					style={{
-						background:
-							"linear-gradient(hsl(var(--foreground) / 0.07), hsl(var(--foreground) / 0.07)), hsl(var(--card))",
-					}}
-					className="flex size-8 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background transition-colors disabled:cursor-not-allowed disabled:text-muted-foreground/40"
+					disabled={!canFlip}
+					style={
+						canFlip
+							? {
+									background:
+										"linear-gradient(hsl(var(--foreground) / 0.07), hsl(var(--foreground) / 0.07)), hsl(var(--card))",
+								}
+							: undefined
+					}
+					className={cn(
+						"relative flex size-8 items-center justify-center rounded-full transition-colors",
+						canFlip
+							? "text-muted-foreground"
+							: "cursor-not-allowed bg-secondary/40 text-muted-foreground",
+					)}
 					aria-label="Swap assets"
 				>
 					<ArrowUpDown className="size-4" />
@@ -324,9 +407,12 @@ export function SwapCard() {
 					/>
 					<Pill onClick={toggleToMode}>
 						<span className="opacity-50">=</span>{" "}
-						{toMode === "token"
-							? formatUsd(toUsd)
-							: `${trim(toAmount)} ${toToken?.symbol ?? ""}`}
+						<ConversionValue
+							mode={toMode}
+							usd={toUsd}
+							units={toAmount}
+							symbol={toToken?.symbol ?? ""}
+						/>
 						<ArrowUpDown className="size-3.5" />
 					</Pill>
 				</div>
@@ -336,13 +422,16 @@ export function SwapCard() {
 
 			{/* Action button with the menu button to its left. */}
 			<div className="mt-2 flex items-center gap-2">
-				<AppMenu />
+				<AppMenu
+					denomination={denomination}
+					onDenominationChange={handleDenominationChange}
+				/>
 				<HapticButton
 					wrapperClassName="grid flex-1"
 					type="button"
 					onClick={handleSubmit}
 					disabled={!canSwap || submitting}
-					className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground disabled:hover:bg-secondary disabled:active:scale-100"
+					className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-secondary/40 disabled:text-muted-foreground disabled:hover:bg-secondary/40 disabled:active:scale-100"
 				>
 					{submitting ? "Confirming…" : actionLabel}
 				</HapticButton>
@@ -351,7 +440,7 @@ export function SwapCard() {
 					onClick={resetForm}
 					disabled={isPristine || submitting}
 					aria-label="Reset"
-					className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-secondary disabled:active:scale-100"
+					className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80 active:scale-95 disabled:cursor-not-allowed disabled:bg-secondary/40 disabled:text-muted-foreground disabled:hover:bg-secondary/40 disabled:active:scale-100"
 				>
 					<RotateCcw className="size-5" />
 				</HapticButton>
