@@ -47,6 +47,13 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 		}
 	}, []);
 
+	// Expose the locale on <html> so globals.css can swap the display font
+	// (Chinese / Korean use dedicated rounded CJK fonts). Reactive, so the font
+	// changes the instant the locale does.
+	useEffect(() => {
+		document.documentElement.setAttribute("data-locale", locale);
+	}, [locale]);
+
 	const setLocale = useCallback((next: Locale) => {
 		setLocaleState(next);
 		try {

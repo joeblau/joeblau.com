@@ -81,6 +81,25 @@
   }
 }
 
+/* Per-locale display fonts. The base UI font is Nunito; Chinese and Korean get
+   dedicated rounded CJK families (loaded via the <link> in layout.tsx). The
+   LocaleProvider sets data-locale on <html>, so switching language swaps the
+   whole UI's font live. */
+html[data-locale="zh"] body {
+  font-family: "M PLUS Rounded 1c", system-ui, sans-serif;
+}
+html[data-locale="ko"] body {
+  font-family: "Chiron GoRound TC", system-ui, sans-serif;
+}
+
+/* The rounded CJK fonts read heavy at the large From/To label weight (semibold
+   rounds up to their 700 face), so in Chinese and Korean drop it one step to
+   medium. */
+html[data-locale="zh"] .token-box-label,
+html[data-locale="ko"] .token-box-label {
+  font-weight: 500;
+}
+
 /* Subtle, theme-aware scrollbar (shadcn-style) */
 .scrollbar-subtle {
   scrollbar-width: thin;
