@@ -33,6 +33,10 @@ export interface TokenRow {
 	logo: string;
 	amount: string;
 	usd: string;
+	/** Token decimals — required to convert display amounts to on-chain base units. */
+	decimals: number;
+	/** Chain VM family, for routing execution (EVM today; SVM guarded). */
+	vmType?: "evm" | "svm";
 }
 
 /** USD price per unit of a token: total usd ÷ holdings. 0 if NaN / divide-by-zero. */
@@ -45,6 +49,11 @@ export function price(token: TokenRow) {
 
 const ADDRESS = "0x71•••976F";
 const AVATAR_COLORS = ["#7dd3fc", "#3b82f6", "#2563eb", "#1e3a8a", "#0ea5e9"];
+
+/** Shorten a wallet address (EVM or Solana) to `1234…wxyz` for display. */
+function truncateAddress(addr: string) {
+	return addr.length <= 12 ? addr : `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
 
 const LOGO = {
 	sol: "https://coin-images.coingecko.com/coins/images/4128/large/solana.png",
@@ -59,14 +68,14 @@ const chainIcon = (chainId: number) =>
 	`https://assets.relay.link/icons/${chainId}/light.png`;
 
 const TOKENS: TokenRow[] = [
-	{ name: "Solana", symbol: "SOL", chain: "Solana", chainId: 792703809, address: "So11111111111111111111111111111111111111112", logo: LOGO.sol, amount: "12.41", usd: "$1,767.18" },
-	{ name: "USD Coin", symbol: "USDC", chain: "Ethereum", chainId: 1, address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", logo: LOGO.usdc, amount: "1240.5", usd: "$1,240.50" },
-	{ name: "Wrapped BTC", symbol: "WBTC", chain: "Ethereum", chainId: 1, address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", logo: LOGO.wbtc, amount: "0.0154", usd: "$956.96" },
-	{ name: "Ethereum", symbol: "ETH", chain: "Ethereum", chainId: 1, address: "0x0000000000000000000000000000000000000000", logo: LOGO.eth, amount: "0.4218", usd: "$693.44" },
-	{ name: "Tether", symbol: "USDT", chain: "Ethereum", chainId: 1, address: "0xdac17f958d2ee523a2206206994597c13d831ec7", logo: LOGO.usdt, amount: "540", usd: "$540.00" },
-	{ name: "USD Coin", symbol: "USDC", chain: "Solana", chainId: 792703809, address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", logo: LOGO.usdc, amount: "320.75", usd: "$320.75" },
-	{ name: "Ethereum", symbol: "ETH", chain: "Base", chainId: 8453, address: "0x4200000000000000000000000000000000000006", logo: LOGO.eth, amount: "0.083", usd: "$136.45" },
-	{ name: "Coinbase ETH", symbol: "cbETH", chain: "Base", chainId: 8453, address: "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22", logo: LOGO.cbeth, amount: "0.061", usd: "$104.43" },
+	{ name: "Solana", symbol: "SOL", chain: "Solana", chainId: 792703809, address: "11111111111111111111111111111111", logo: LOGO.sol, amount: "12.41", usd: "$1,767.18", decimals: 9, vmType: "svm" },
+	{ name: "USD Coin", symbol: "USDC", chain: "Ethereum", chainId: 1, address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", logo: LOGO.usdc, amount: "1240.5", usd: "$1,240.50", decimals: 6, vmType: "evm" },
+	{ name: "Wrapped BTC", symbol: "WBTC", chain: "Ethereum", chainId: 1, address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", logo: LOGO.wbtc, amount: "0.0154", usd: "$956.96", decimals: 8, vmType: "evm" },
+	{ name: "Ethereum", symbol: "ETH", chain: "Ethereum", chainId: 1, address: "0x0000000000000000000000000000000000000000", logo: LOGO.eth, amount: "0.4218", usd: "$693.44", decimals: 18, vmType: "evm" },
+	{ name: "Tether", symbol: "USDT", chain: "Ethereum", chainId: 1, address: "0xdac17f958d2ee523a2206206994597c13d831ec7", logo: LOGO.usdt, amount: "540", usd: "$540.00", decimals: 6, vmType: "evm" },
+	{ name: "USD Coin", symbol: "USDC", chain: "Solana", chainId: 792703809, address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", logo: LOGO.usdc, amount: "320.75", usd: "$320.75", decimals: 6, vmType: "svm" },
+	{ name: "Ethereum", symbol: "ETH", chain: "Base", chainId: 8453, address: "0x0000000000000000000000000000000000000000", logo: LOGO.eth, amount: "0.083", usd: "$136.45", decimals: 18, vmType: "evm" },
+	{ name: "Coinbase ETH", symbol: "cbETH", chain: "Base", chainId: 8453, address: "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22", logo: LOGO.cbeth, amount: "0.061", usd: "$104.43", decimals: 18, vmType: "evm" },
 ];
 
 const FILTERS: { label: string; chainId?: number; active?: boolean }[] = [
@@ -131,11 +140,11 @@ function TokenIcon({ token }: { token: TokenRow }) {
 	);
 }
 
-function AssetStack({ token }: { token: TokenRow }) {
+function AssetStack({ token, seed = ADDRESS }: { token: TokenRow; seed?: string }) {
 	return (
 		<div className="relative h-14 w-7 shrink-0">
 			<div className="absolute left-1/2 top-0 size-7 -translate-x-1/2 overflow-hidden rounded-full ring-2 ring-card">
-				<Avatar size={28} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
+				<Avatar size={28} name={seed} variant="marble" colors={AVATAR_COLORS} />
 			</div>
 			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<img
@@ -225,12 +234,14 @@ function SelectedMeta({
 function SelectedHeader({
 	variant,
 	token,
+	walletAddress,
 	onSetAmount,
 	slippage,
 	onOpenSlippage,
 }: {
 	variant: Variant;
 	token: TokenRow;
+	walletAddress?: string | null;
 	onSetAmount?: (amount: string) => void;
 	slippage?: number;
 	onOpenSlippage?: () => void;
@@ -238,9 +249,11 @@ function SelectedHeader({
 	return (
 		<div className="flex items-start justify-between gap-3">
 			<div className="flex items-center gap-3">
-				<AssetStack token={token} />
+				<AssetStack token={token} seed={walletAddress ?? ADDRESS} />
 				<div className="flex flex-col leading-none -space-y-0.5">
-					<span className="text-sm text-muted-foreground">{ADDRESS}</span>
+					<span className="text-sm text-muted-foreground">
+						{walletAddress ? truncateAddress(walletAddress) : ADDRESS}
+					</span>
 					<span className="text-sm text-muted-foreground">{token.chain}</span>
 					<span className="text-base font-semibold text-foreground">{token.name}</span>
 				</div>
@@ -265,6 +278,7 @@ export function TokenBox({
 	slippage,
 	onOpenSlippage,
 	connected,
+	walletAddress,
 	onConnect,
 	genAddress,
 	onToggleGenAddress,
@@ -278,6 +292,8 @@ export function TokenBox({
 	slippage?: number;
 	onOpenSlippage?: () => void;
 	connected?: boolean;
+	/** Connected wallet address (EVM or Solana), or null when disconnected. */
+	walletAddress?: string | null;
 	onConnect?: () => void;
 	genAddress?: boolean;
 	onToggleGenAddress?: () => void;
@@ -412,6 +428,7 @@ export function TokenBox({
 								<SelectedHeader
 									variant={variant}
 									token={selected}
+									walletAddress={walletAddress}
 									onSetAmount={onSetAmount}
 									slippage={slippage}
 									onOpenSlippage={onOpenSlippage}
@@ -425,7 +442,7 @@ export function TokenBox({
 								exit={{ opacity: 0 }}
 								transition={{ duration: 0.2, ease: "easeOut" }}
 							>
-								<span className="block text-5xl font-semibold text-muted-foreground">
+								<span className="token-box-label block text-5xl font-semibold text-foreground/30">
 									{t("tokenDrawer.placeholder.label", { label })}
 								</span>
 								<kbd className="pointer-events-none absolute right-0 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
@@ -460,10 +477,15 @@ export function TokenBox({
 							connected ? (
 								<div className="flex items-center gap-3 rounded-2xl bg-foreground/[0.06] px-4 py-3.5">
 									<div className="size-7 shrink-0 overflow-hidden rounded-full">
-										<Avatar size={28} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
+										<Avatar
+											size={28}
+											name={walletAddress ?? ADDRESS}
+											variant="marble"
+											colors={AVATAR_COLORS}
+										/>
 									</div>
 									<span className="flex-1 text-lg font-semibold text-foreground">
-										0x71C7...976F
+										{walletAddress ? truncateAddress(walletAddress) : "0x71C7...976F"}
 									</span>
 									<Lock className="size-4 text-muted-foreground" />
 								</div>

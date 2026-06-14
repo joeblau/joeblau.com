@@ -13,6 +13,10 @@ import { SlippageDrawer } from "@/components/slippage-drawer";
 import { price, TokenBox, type TokenRow } from "@/components/token-drawer";
 import { useTranslations } from "@/i18n/locale-provider";
 import { usePersistentState } from "@/lib/use-persistent-state";
+import type { QuoteRequest } from "@/lib/relay";
+import { useExecuteSwap } from "@/lib/use-execute-swap";
+import { PREVIEW_USER, useSwapQuote } from "@/lib/use-swap-quote";
+import { useWallet } from "@/lib/use-wallet";
 import { cn } from "@/lib/utils";
 
 /** Map the persisted denomination setting to an amount-input display mode. */
@@ -34,6 +38,11 @@ const FEE_USD = 0.25;
 /** Trim a number to a clean string (drops trailing zeros, caps at 8 decimals). */
 function trim(n: number) {
 	return String(Number(n.toFixed(8)));
+}
+
+/** Trim a USD value to a clean string, capped at 2 decimal places. */
+function trimUsd(n: number) {
+	return String(Number(n.toFixed(2)));
 }
 
 /**
@@ -119,8 +128,11 @@ function AmountInput({
 	sizeClassName?: string;
 }) {
 	const t = useTranslations();
+	// Dollar values ($ prefix) never show more than 2 decimals; token amounts up to 8.
+	const maxFraction = prefix === "$" ? 2 : 8;
 	const dot = value.indexOf(".");
-	const fractionDigits = dot === -1 ? 0 : Math.min(value.length - dot - 1, 8);
+	const fractionDigits =
+		dot === -1 ? 0 : Math.min(value.length - dot - 1, maxFraction);
 	return (
 		<div
 			role="textbox"
@@ -134,7 +146,7 @@ function AmountInput({
 				suffix={value.endsWith(".") ? "." : ""}
 				format={{
 					minimumFractionDigits: fractionDigits,
-					maximumFractionDigits: 8,
+					maximumFractionDigits: maxFraction,
 					useGrouping: false,
 				}}
 				className={cn(
@@ -164,7 +176,8 @@ export function SwapCard() {
 	const [toMode, setToMode] = useState<"token" | "usd">(defaultMode);
 	const [slippage, setSlippage] = useState(0.005);
 	const [slippageOpen, setSlippageOpen] = useState(false);
-	const [connected, setConnected] = useState(false);
+	// Real wallet connection via Privy (external EVM/SVM wallets only).
+	const { connected, address, connect } = useWallet();
 	const [genAddress, setGenAddress] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const action = getActionLabel(fromToken, toToken);
@@ -176,10 +189,32 @@ export function SwapCard() {
 	const fromUnits =
 		fromMode === "token" ? fromInput : fromPrice > 0 ? fromInput / fromPrice : 0;
 	const fromUsd = fromUnits * fromPrice;
-	const toUsd =
-		fromToken && toToken ? Math.max(0, fromUsd - FEE_USD) * (1 - slippage) : 0;
+
+	// Live Relay quote (debounced). Drives the real received amount + fees; while
+	// it loads or if it errors we fall back to a local price estimate so the UI
+	// stays responsive.
+	const quoteRequest: QuoteRequest | null =
+		fromToken && toToken && fromUnits > 0
+			? {
+					user: address ?? PREVIEW_USER,
+					originChainId: fromToken.chainId,
+					originCurrency: fromToken.address,
+					originDecimals: fromToken.decimals,
+					destinationChainId: toToken.chainId,
+					destinationCurrency: toToken.address,
+					destinationDecimals: toToken.decimals,
+					amount: trim(fromUnits),
+					tradeType: "EXACT_INPUT",
+				}
+			: null;
+	const { quote } = useSwapQuote(quoteRequest);
+
 	const toPrice = toToken ? price(toToken) : 0;
-	const toAmount = toToken && toPrice > 0 ? toUsd / toPrice : 0;
+	const estimateToUsd =
+		fromToken && toToken ? Math.max(0, fromUsd - FEE_USD) * (1 - slippage) : 0;
+	const estimateToAmount = toToken && toPrice > 0 ? estimateToUsd / toPrice : 0;
+	const toUsd = quote ? quote.out.usd : estimateToUsd;
+	const toAmount = quote ? Number(quote.out.amount) : estimateToAmount;
 
 	// Requirements to enable the action: both tokens chosen, a positive amount,
 	// and enough from-balance to cover it. Otherwise disable and show the reason.
@@ -202,7 +237,7 @@ export function SwapCard() {
 	// displayed value stays equal across the toggle.
 	const toggleFromMode = () => {
 		if (fromMode === "token") {
-			setFromAmount(trim(fromUsd));
+			setFromAmount(trimUsd(fromUsd));
 			setFromMode("usd");
 		} else {
 			setFromAmount(trim(fromUnits));
@@ -218,7 +253,7 @@ export function SwapCard() {
 		setDenomination(next);
 		const mode = modeForDenomination(next);
 		if (mode !== fromMode) {
-			setFromAmount(trim(mode === "usd" ? fromUsd : fromUnits));
+			setFromAmount(mode === "usd" ? trimUsd(fromUsd) : trim(fromUnits));
 		}
 		setFromMode(mode);
 		setToMode(mode);
@@ -253,9 +288,22 @@ export function SwapCard() {
 	const isPristine =
 		fromToken === null && toToken === null && Number(fromAmount) === 0;
 
-	// Send/Swap/Bridge: play the Apple-gradient effect for 3s, then reset the form.
+	// Send/Swap/Bridge. With a live quote + connected wallet we execute the real
+	// transaction(s) via Relay; if no wallet is connected we open connect; if a
+	// quote hasn't resolved yet we fall back to the preview animation.
+	const exec = useExecuteSwap();
 	const handleSubmit = () => {
 		if (!canSwap || submitting) return;
+		if (!connected) {
+			connect();
+			return;
+		}
+		if (quote) {
+			setSubmitting(true);
+			void exec.run(quote);
+			return;
+		}
+		// Live quote hasn't resolved — play the preview effect and reset.
 		setSubmitting(true);
 		window.setTimeout(() => {
 			setSubmitting(false);
@@ -263,9 +311,31 @@ export function SwapCard() {
 		}, 3000);
 	};
 
-	// Latest from amount for the global keyboard handler (avoids stale closures).
+	// Reflect real execution status: clear the form on success, drop the spinner
+	// when execution settles either way.
+	useEffect(() => {
+		if (exec.status === "success") {
+			resetForm();
+			setSubmitting(false);
+			exec.reset();
+		} else if (exec.status === "error") {
+			setSubmitting(false);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [exec.status]);
+
+	// Latest from amount + mode for the global keyboard handler (avoids stale closures).
 	const stateRef = useRef(fromAmount);
 	stateRef.current = fromAmount;
+	const fromModeRef = useRef(fromMode);
+	fromModeRef.current = fromMode;
+
+	// Dollars are capped at 2 decimals; token amounts keep full precision.
+	const exceedsDecimals = (s: string) => {
+		if (fromModeRef.current !== "usd") return false;
+		const dot = s.indexOf(".");
+		return dot !== -1 && s.length - dot - 1 > 2;
+	};
 
 	const handleKey = (key: string) => {
 		const current = stateRef.current;
@@ -274,7 +344,9 @@ export function SwapCard() {
 		} else if (key === ".") {
 			if (!current.includes(".")) setFromAmount(`${current}.`);
 		} else {
-			setFromAmount(sanitizeAmount(current === "0" ? key : current + key));
+			const next = sanitizeAmount(current === "0" ? key : current + key);
+			if (exceedsDecimals(next)) return;
+			setFromAmount(next);
 		}
 	};
 
@@ -309,7 +381,11 @@ export function SwapCard() {
 				.trim()
 				.replace(/,/g, "");
 			if (text !== "" && /^[0-9]*\.?[0-9]*$/.test(text)) {
-				setFromAmount(sanitizeAmount(text));
+				const next = sanitizeAmount(text);
+				// Clamp pasted dollar values to 2 decimals.
+				setFromAmount(
+					fromModeRef.current === "usd" ? trimUsd(Number(next) || 0) : next,
+				);
 				e.preventDefault();
 			}
 		};
@@ -337,7 +413,8 @@ export function SwapCard() {
 					onSelect={setFromToken}
 					onSetAmount={setFromAmount}
 					connected={connected}
-					onConnect={() => setConnected(true)}
+					walletAddress={address}
+					onConnect={connect}
 					genAddress={genAddress}
 					onToggleGenAddress={() => setGenAddress((v) => !v)}
 					triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4 hover:bg-foreground/[0.03]"
@@ -399,6 +476,7 @@ export function SwapCard() {
 					variant="to"
 					selected={toToken}
 					onSelect={setToToken}
+					walletAddress={address}
 					slippage={slippage}
 					onOpenSlippage={() => setSlippageOpen(true)}
 					triggerClassName="-mx-4 -mt-6 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-6 hover:bg-foreground/[0.03]"
