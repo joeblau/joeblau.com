@@ -254,6 +254,7 @@ function SelectedHeader({
 
 export function TokenBox({
 	variant,
+	selected = null,
 	triggerClassName,
 	onSelect,
 	onSetAmount,
@@ -265,6 +266,8 @@ export function TokenBox({
 	onToggleGenAddress,
 }: {
 	variant: Variant;
+	/** Controlled selected token (owned by the parent so the flip can swap them). */
+	selected?: TokenRow | null;
 	triggerClassName?: string;
 	onSelect?: (token: TokenRow) => void;
 	onSetAmount?: (amount: string) => void;
@@ -276,7 +279,6 @@ export function TokenBox({
 	onToggleGenAddress?: () => void;
 }) {
 	const [open, setOpen] = useState(false);
-	const [selected, setSelected] = useState<TokenRow | null>(null);
 	const [query, setQuery] = useState("");
 	const searchRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<HTMLDivElement>(null);
@@ -319,7 +321,6 @@ export function TokenBox({
 	activeRef.current = activeIndex;
 
 	const selectToken = (t: TokenRow) => {
-		setSelected(t);
 		setOpen(false);
 		onSelect?.(t);
 	};
@@ -499,7 +500,7 @@ export function TokenBox({
 
 					<div
 						ref={listRef}
-						className="scrollbar-subtle mt-2 min-h-0 flex-1 overflow-y-auto px-5 pb-8"
+						className="scroll-fade scrollbar-subtle mt-2 min-h-0 flex-1 overflow-y-auto px-5 pb-8"
 					>
 						{filtered.length === 0 && (
 							<p className="py-8 text-center text-sm text-muted-foreground">
