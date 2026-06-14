@@ -499,8 +499,7 @@ export function TokenBox({
 
 					<div
 						ref={listRef}
-						data-vaul-no-drag
-						className="scrollbar-subtle mt-2 min-h-0 flex-1 touch-pan-y overscroll-contain overflow-y-auto px-5 pb-8"
+						className="scrollbar-subtle mt-2 min-h-0 flex-1 overflow-y-auto px-5 pb-8"
 					>
 						{filtered.length === 0 && (
 							<p className="py-8 text-center text-sm text-muted-foreground">
