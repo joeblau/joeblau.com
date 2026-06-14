@@ -19,14 +19,23 @@ import { cn } from "@/lib/utils";
 
 type Variant = "from" | "to";
 
-interface TokenRow {
+export interface TokenRow {
 	name: string;
 	symbol: string;
 	chain: string;
 	chainId: number;
+	address: string;
 	logo: string;
 	amount: string;
 	usd: string;
+}
+
+/** USD price per unit of a token: total usd ÷ holdings. 0 if NaN / divide-by-zero. */
+export function price(token: TokenRow) {
+	const usd = Number.parseFloat(token.usd.replace(/[^0-9.]/g, "")) || 0;
+	const amount = Number.parseFloat(token.amount) || 0;
+	if (!(usd > 0) || !(amount > 0)) return 0;
+	return usd / amount;
 }
 
 const ADDRESS = "0x71•••976F";
@@ -45,14 +54,14 @@ const chainIcon = (chainId: number) =>
 	`https://assets.relay.link/icons/${chainId}/light.png`;
 
 const TOKENS: TokenRow[] = [
-	{ name: "Solana", symbol: "SOL", chain: "Solana", chainId: 792703809, logo: LOGO.sol, amount: "12.41", usd: "$1,767.18" },
-	{ name: "USD Coin", symbol: "USDC", chain: "Ethereum", chainId: 1, logo: LOGO.usdc, amount: "1240.5", usd: "$1,240.50" },
-	{ name: "Wrapped BTC", symbol: "WBTC", chain: "Ethereum", chainId: 1, logo: LOGO.wbtc, amount: "0.0154", usd: "$956.96" },
-	{ name: "Ethereum", symbol: "ETH", chain: "Ethereum", chainId: 1, logo: LOGO.eth, amount: "0.4218", usd: "$693.44" },
-	{ name: "Tether", symbol: "USDT", chain: "Ethereum", chainId: 1, logo: LOGO.usdt, amount: "540", usd: "$540.00" },
-	{ name: "USD Coin", symbol: "USDC", chain: "Solana", chainId: 792703809, logo: LOGO.usdc, amount: "320.75", usd: "$320.75" },
-	{ name: "Ethereum", symbol: "ETH", chain: "Base", chainId: 8453, logo: LOGO.eth, amount: "0.083", usd: "$136.45" },
-	{ name: "Coinbase ETH", symbol: "cbETH", chain: "Base", chainId: 8453, logo: LOGO.cbeth, amount: "0.061", usd: "$104.43" },
+	{ name: "Solana", symbol: "SOL", chain: "Solana", chainId: 792703809, address: "So11111111111111111111111111111111111111112", logo: LOGO.sol, amount: "12.41", usd: "$1,767.18" },
+	{ name: "USD Coin", symbol: "USDC", chain: "Ethereum", chainId: 1, address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", logo: LOGO.usdc, amount: "1240.5", usd: "$1,240.50" },
+	{ name: "Wrapped BTC", symbol: "WBTC", chain: "Ethereum", chainId: 1, address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", logo: LOGO.wbtc, amount: "0.0154", usd: "$956.96" },
+	{ name: "Ethereum", symbol: "ETH", chain: "Ethereum", chainId: 1, address: "0x0000000000000000000000000000000000000000", logo: LOGO.eth, amount: "0.4218", usd: "$693.44" },
+	{ name: "Tether", symbol: "USDT", chain: "Ethereum", chainId: 1, address: "0xdac17f958d2ee523a2206206994597c13d831ec7", logo: LOGO.usdt, amount: "540", usd: "$540.00" },
+	{ name: "USD Coin", symbol: "USDC", chain: "Solana", chainId: 792703809, address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", logo: LOGO.usdc, amount: "320.75", usd: "$320.75" },
+	{ name: "Ethereum", symbol: "ETH", chain: "Base", chainId: 8453, address: "0x4200000000000000000000000000000000000006", logo: LOGO.eth, amount: "0.083", usd: "$136.45" },
+	{ name: "Coinbase ETH", symbol: "cbETH", chain: "Base", chainId: 8453, address: "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22", logo: LOGO.cbeth, amount: "0.061", usd: "$104.43" },
 ];
 
 const FILTERS: { label: string; chainId?: number; active?: boolean }[] = [
@@ -64,6 +73,32 @@ const FILTERS: { label: string; chainId?: number; active?: boolean }[] = [
 
 function tokenKey(t: TokenRow) {
 	return `${t.name}-${t.chain}`;
+}
+
+/** Fuzzy match: case-insensitive substring or in-order subsequence. */
+function fuzzyMatch(query: string, text: string) {
+	const q = query.toLowerCase().replace(/\s+/g, "");
+	const t = text.toLowerCase();
+	if (t.includes(q)) return true;
+	let qi = 0;
+	for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+		if (t[ti] === q[qi]) qi++;
+	}
+	return qi === q.length;
+}
+
+/** Format a slippage fraction as a percent string with trailing zeros trimmed. */
+function formatPct(fraction: number) {
+	return `${Number((fraction * 100).toFixed(4))}%`;
+}
+
+/** Test amount: 1% of holdings, capped at ~$1 worth of the asset. */
+function computeTest(token: TokenRow) {
+	const usd = Number.parseFloat(token.usd.replace(/[^0-9.]/g, "")) || 0;
+	const amount = Number.parseFloat(token.amount) || 0;
+	if (usd <= 0 || amount <= 0) return "0";
+	const test = Math.min(0.01 * amount, amount / usd);
+	return String(Number(test.toFixed(8)));
 }
 
 function ChainBadge({ chainId, className }: { chainId: number; className?: string }) {
@@ -93,54 +128,86 @@ function TokenIcon({ token }: { token: TokenRow }) {
 
 function AssetStack({ token }: { token: TokenRow }) {
 	return (
-		<div className="relative h-[68px] w-9 shrink-0">
-			<div className="absolute left-1/2 top-0 size-9 -translate-x-1/2 overflow-hidden rounded-full ring-2 ring-card">
-				<Avatar size={36} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
+		<div className="relative h-14 w-7 shrink-0">
+			<div className="absolute left-1/2 top-0 size-7 -translate-x-1/2 overflow-hidden rounded-full ring-2 ring-card">
+				<Avatar size={28} name={ADDRESS} variant="marble" colors={AVATAR_COLORS} />
 			</div>
 			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<img
 				src={chainIcon(token.chainId)}
 				alt={token.chain}
-				className="absolute left-1/2 top-4 size-9 -translate-x-1/2 rounded-full bg-card object-cover ring-2 ring-card"
+				className="absolute left-1/2 top-3.5 size-7 -translate-x-1/2 rounded-full bg-card object-cover ring-2 ring-card"
 			/>
 			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<img
 				src={token.logo}
 				alt={token.name}
-				className="absolute left-1/2 top-8 size-9 -translate-x-1/2 rounded-full bg-card object-cover ring-2 ring-card"
+				className="absolute left-1/2 top-7 size-7 -translate-x-1/2 rounded-full bg-card object-cover ring-2 ring-card"
 			/>
 		</div>
 	);
 }
 
-function Pill({ children }: { children: React.ReactNode }) {
+function ClickablePill({
+	onClick,
+	children,
+}: {
+	onClick: (e: React.MouseEvent) => void;
+	children: React.ReactNode;
+}) {
 	return (
-		<span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.07] px-3 py-1.5 text-sm text-muted-foreground">
+		<span
+			role="button"
+			tabIndex={0}
+			onClick={onClick}
+			className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.07] px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-foreground/[0.12]"
+		>
 			{children}
 		</span>
 	);
 }
 
-function SelectedMeta({ variant, token }: { variant: Variant; token: TokenRow }) {
+function SelectedMeta({
+	variant,
+	token,
+	onSetAmount,
+	slippage,
+	onOpenSlippage,
+}: {
+	variant: Variant;
+	token: TokenRow;
+	onSetAmount?: (amount: string) => void;
+	slippage?: number;
+	onOpenSlippage?: () => void;
+}) {
 	if (variant === "to") {
 		return (
 			<div className="flex flex-col items-end gap-2">
-				<Pill>
+				<ClickablePill
+					onClick={(e) => {
+						e.stopPropagation();
+						onOpenSlippage?.();
+					}}
+				>
 					<SlidersHorizontal className="size-3.5" />
-					Slippage 0.5%
-				</Pill>
+					Slippage {formatPct(slippage ?? 0.005)}
+				</ClickablePill>
 				<span className="text-sm text-muted-foreground">Fee $0.25</span>
 			</div>
 		);
 	}
+	const set = (amount: string) => (e: React.MouseEvent) => {
+		e.stopPropagation();
+		onSetAmount?.(amount);
+	};
 	return (
 		<div className="flex flex-col items-end gap-2">
 			<div className="flex gap-2">
-				<Pill>
+				<ClickablePill onClick={set(computeTest(token))}>
 					<FlaskConical className="size-3.5" />
 					Test
-				</Pill>
-				<Pill>Max</Pill>
+				</ClickablePill>
+				<ClickablePill onClick={set(token.amount)}>Max</ClickablePill>
 			</div>
 			<span className="text-sm text-muted-foreground">
 				{token.amount} {token.symbol}
@@ -149,7 +216,19 @@ function SelectedMeta({ variant, token }: { variant: Variant; token: TokenRow })
 	);
 }
 
-function SelectedHeader({ variant, token }: { variant: Variant; token: TokenRow }) {
+function SelectedHeader({
+	variant,
+	token,
+	onSetAmount,
+	slippage,
+	onOpenSlippage,
+}: {
+	variant: Variant;
+	token: TokenRow;
+	onSetAmount?: (amount: string) => void;
+	slippage?: number;
+	onOpenSlippage?: () => void;
+}) {
 	return (
 		<div className="flex items-start justify-between">
 			<div className="flex items-center gap-3">
@@ -157,10 +236,16 @@ function SelectedHeader({ variant, token }: { variant: Variant; token: TokenRow 
 				<div className="flex flex-col leading-none -space-y-0.5">
 					<span className="text-sm text-muted-foreground">{ADDRESS}</span>
 					<span className="text-sm text-muted-foreground">{token.chain}</span>
-					<span className="text-xl font-semibold text-foreground">{token.name}</span>
+					<span className="text-base font-semibold text-foreground">{token.name}</span>
 				</div>
 			</div>
-			<SelectedMeta variant={variant} token={token} />
+			<SelectedMeta
+				variant={variant}
+				token={token}
+				onSetAmount={onSetAmount}
+				slippage={slippage}
+				onOpenSlippage={onOpenSlippage}
+			/>
 		</div>
 	);
 }
@@ -168,13 +253,29 @@ function SelectedHeader({ variant, token }: { variant: Variant; token: TokenRow 
 export function TokenBox({
 	variant,
 	triggerClassName,
+	onSelect,
+	onSetAmount,
+	slippage,
+	onOpenSlippage,
 }: {
 	variant: Variant;
 	triggerClassName?: string;
+	onSelect?: (token: TokenRow) => void;
+	onSetAmount?: (amount: string) => void;
+	slippage?: number;
+	onOpenSlippage?: () => void;
 }) {
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<TokenRow | null>(null);
+	const [query, setQuery] = useState("");
 	const label = variant === "from" ? "From" : "To";
+
+	const filtered =
+		query.trim() === ""
+			? TOKENS
+			: TOKENS.filter((t) =>
+					fuzzyMatch(query, `${t.name} ${t.symbol} ${t.chain} ${t.address}`),
+				);
 
 	return (
 		<Drawer.Root open={open} onOpenChange={setOpen}>
@@ -187,7 +288,13 @@ export function TokenBox({
 				)}
 			>
 				{selected ? (
-					<SelectedHeader variant={variant} token={selected} />
+					<SelectedHeader
+						variant={variant}
+						token={selected}
+						onSetAmount={onSetAmount}
+						slippage={slippage}
+						onOpenSlippage={onOpenSlippage}
+					/>
 				) : (
 					<span className="block text-5xl font-semibold text-muted-foreground">
 						{label}...
@@ -244,6 +351,8 @@ export function TokenBox({
 							<Search className="size-5 shrink-0 text-muted-foreground" />
 							<input
 								type="text"
+								value={query}
+								onChange={(e) => setQuery(e.target.value)}
 								placeholder="Search name or paste address"
 								className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
 							/>
@@ -278,7 +387,12 @@ export function TokenBox({
 					</div>
 
 					<div className="scrollbar-subtle mt-2 flex-1 overflow-y-auto px-5 pb-8">
-						{TOKENS.map((t) => {
+						{filtered.length === 0 && (
+							<p className="py-8 text-center text-sm text-muted-foreground">
+								No tokens found
+							</p>
+						)}
+						{filtered.map((t) => {
 							const isSelected = selected !== null && tokenKey(selected) === tokenKey(t);
 							return (
 								<button
@@ -287,6 +401,7 @@ export function TokenBox({
 									onClick={() => {
 										setSelected(t);
 										setOpen(false);
+										onSelect?.(t);
 									}}
 									className={cn(
 										"flex w-full cursor-pointer items-center gap-3 rounded-xl py-3 text-left transition-colors hover:bg-foreground/[0.04]",

@@ -44,6 +44,7 @@
       "name": "jb-swap",
       "version": "0.1.0",
       "dependencies": {
+        "@number-flow/react": "^0.6.0",
         "@opennextjs/cloudflare": "^1.14.4",
         "@radix-ui/react-slot": "^1.2.4",
         "@relayprotocol/relay-sdk": "^5.2.7",
@@ -652,7 +653,7 @@
 
     "@nolyfill/is-core-module": ["@nolyfill/is-core-module@1.0.39", "", {}, "sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA=="],
 
-    "@number-flow/react": ["@number-flow/react@0.5.14", "", { "dependencies": { "esm-env": "^1.1.4", "number-flow": "0.5.12" }, "peerDependencies": { "react": "^18 || ^19", "react-dom": "^18 || ^19" } }, "sha512-FGUqjh/P5/ukr0U0ySwb987M0SbRkrnZq70f0wQFncDbXa3SIib4L+FTr5ngvWwGAW8S6b391eTXcfhErZsw4w=="],
+    "@number-flow/react": ["@number-flow/react@0.6.0", "", { "dependencies": { "esm-env": "^1.1.4", "number-flow": "0.6.0" }, "peerDependencies": { "react": "^18 || ^19", "react-dom": "^18 || ^19" } }, "sha512-77Yfc9+zkV2UDSP8phhZzxJGuwxi/Tt1TikmipL+1r3e9GFKEYDZ1XwInj67NoSt3OnOB0KLvvcl3lfPZgBHVQ=="],
 
     "@opennextjs/aws": ["@opennextjs/aws@3.9.16", "", { "dependencies": { "@ast-grep/napi": "^0.40.5", "@aws-sdk/client-cloudfront": "3.984.0", "@aws-sdk/client-dynamodb": "3.984.0", "@aws-sdk/client-lambda": "3.984.0", "@aws-sdk/client-s3": "3.984.0", "@aws-sdk/client-sqs": "3.984.0", "@node-minify/core": "^8.0.6", "@node-minify/terser": "^8.0.6", "@tsconfig/node18": "^1.0.3", "aws4fetch": "^1.0.20", "chalk": "^5.6.2", "cookie": "^1.0.2", "esbuild": "0.25.4", "express": "^5.1.0", "path-to-regexp": "^6.3.0", "urlpattern-polyfill": "^10.1.0", "yaml": "^2.8.1" }, "peerDependencies": { "next": "~15.0.8 || ~15.1.12 || ~15.2.9 || ~15.3.9 || ~15.4.11 || ~15.5.10 || ~16.0.11 || ^16.1.5" }, "bin": { "open-next": "dist/index.js" } }, "sha512-jQQStCysIllNCPqz5W2KSguXpr+ETlOcD8SyNu+h9zwpRVYk4uEPQge+ErG3avI5xsT8vKA7EGLYG59dhj/B6Q=="],
 
@@ -2158,7 +2159,7 @@
 
     "npm-run-path": ["npm-run-path@4.0.1", "", { "dependencies": { "path-key": "^3.0.0" } }, "sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw=="],
 
-    "number-flow": ["number-flow@0.5.12", "", { "dependencies": { "esm-env": "^1.1.4" } }, "sha512-CIs21h2JkfYG4rfgERaUNAk0Cz+Ef14fNJfSCbGGhgRgconQc9b7rcCQfi9SZ36kNjVXmsl2BrzDbjGtEgumAA=="],
+    "number-flow": ["number-flow@0.6.0", "", { "dependencies": { "esm-env": "^1.1.4" } }, "sha512-K8flNq2Wqus53vjp/btVo3qXFkagF8dIdYavreBfE7hlvFFG/b1HMGEH6nZL+mlrJ+4lbLP9OmPv3t2rmRkpSQ=="],
 
     "nypm": ["nypm@0.6.5", "", { "dependencies": { "citty": "^0.2.0", "pathe": "^2.0.3", "tinyexec": "^1.0.2" }, "bin": { "nypm": "dist/cli.mjs" } }, "sha512-K6AJy1GMVyfyMXRVB88700BJqNUkByijGJM8kEHpLdcAt+vSQAVfkWWHYzuRXHSY6xA2sNc5RjTj0p9rE2izVQ=="],
 
@@ -2870,6 +2871,8 @@
 
     "is-bun-module/semver": ["semver@7.7.4", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA=="],
 
+    "jb-travel/@number-flow/react": ["@number-flow/react@0.5.14", "", { "dependencies": { "esm-env": "^1.1.4", "number-flow": "0.5.12" }, "peerDependencies": { "react": "^18 || ^19", "react-dom": "^18 || ^19" } }, "sha512-FGUqjh/P5/ukr0U0ySwb987M0SbRkrnZq70f0wQFncDbXa3SIib4L+FTr5ngvWwGAW8S6b391eTXcfhErZsw4w=="],
+
     "jest-worker/supports-color": ["supports-color@8.1.1", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q=="],
 
     "libsql/detect-libc": ["detect-libc@2.0.2", "", {}, "sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw=="],
@@ -3045,6 +3048,8 @@
     "express/mime-types/mime-db": ["mime-db@1.54.0", "", {}, "sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ=="],
 
     "glob/minimatch/brace-expansion": ["brace-expansion@5.0.4", "", { "dependencies": { "balanced-match": "^4.0.2" } }, "sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg=="],
+
+    "jb-travel/@number-flow/react/number-flow": ["number-flow@0.5.12", "", { "dependencies": { "esm-env": "^1.1.4" } }, "sha512-CIs21h2JkfYG4rfgERaUNAk0Cz+Ef14fNJfSCbGGhgRgconQc9b7rcCQfi9SZ36kNjVXmsl2BrzDbjGtEgumAA=="],
 
     "mongodb-connection-string-url/whatwg-url/tr46": ["tr46@5.1.1", "", { "dependencies": { "punycode": "^2.3.1" } }, "sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw=="],
 
