@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/toaster";
 import { WalletProvider } from "@/components/wallet-provider";
 import { LocaleProvider } from "@/i18n/locale-provider";
 
@@ -47,6 +48,7 @@ export default function RootLayout({
 					<WalletProvider>
 						<LocaleProvider>{children}</LocaleProvider>
 					</WalletProvider>
+					<Toaster />
 				</ThemeProvider>
 			</body>
 		</html>
