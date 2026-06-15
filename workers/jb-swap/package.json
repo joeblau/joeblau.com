@@ -11,6 +11,7 @@
 		"lint": "next lint",
 		"test": "bun test src/lib",
 		"test:watch": "bun test src/lib --watch",
+		"build:tokens": "bun run scripts/build-token-list.ts",
 		"cf-build": "opennextjs-cloudflare build",
 		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
 		"upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",

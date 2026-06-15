@@ -53,6 +53,72 @@ export function formatTokenAmount(
 	return trimmed ? `${whole}.${trimmed}` : whole;
 }
 
+const SUBSCRIPT_DIGITS = "₀₁₂₃₄₅₆₇₈₉";
+
+/** Render a count as unicode subscript digits (11 -> "₁₁"). */
+export function toSubscript(count: number): string {
+	return String(count).replace(/\d/g, (d) => SUBSCRIPT_DIGITS[Number(d)]);
+}
+
+/**
+ * Display a token amount at a readable resolution (display only — never use the
+ * result for math):
+ *  - `>= 1`  -> grouped, up to 4 decimals trimmed (e.g. "1,190.9824")
+ *  - `< 1`   -> the first 4 significant digits; when there are 4+ leading zeros
+ *              after the decimal they collapse to DexScreener subscript notation
+ *              (e.g. 0.0₁₁1089). Fewer than 4 leading zeros render literally
+ *              (e.g. 0.004221, 0.02805).
+ */
+export interface TokenDisplayParts {
+	/** Text before the subscript (the whole value when there's no subscript). */
+	lead: string;
+	/** Zero-count as a plain string (e.g. "11"), or null when no subscript. */
+	sub: string | null;
+	/** Significant digits after the subscript. */
+	rest: string;
+}
+
+/**
+ * The structured form of {@link formatTokenDisplay} — lets a renderer style the
+ * subscript (size/baseline) instead of using the tiny unicode subscript glyphs.
+ */
+export function formatTokenParts(value: string | number): TokenDisplayParts {
+	if (typeof value === "number" && !Number.isFinite(value)) {
+		return { lead: "0", sub: null, rest: "" };
+	}
+	const raw =
+		typeof value === "string"
+			? value.trim()
+			: value.toLocaleString("en-US", {
+					maximumFractionDigits: 20,
+					useGrouping: false,
+				});
+	if (raw === "" || Number(raw) === 0) return { lead: "0", sub: null, rest: "" };
+
+	const sign = raw.startsWith("-") ? "-" : "";
+	const abs = sign ? raw.slice(1) : raw;
+	const [whole = "0", fracRaw = ""] = abs.split(".");
+
+	if (whole !== "0" && whole !== "") {
+		const dec = fracRaw.slice(0, 4).replace(/0+$/, "");
+		const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		return { lead: sign + (dec ? `${grouped}.${dec}` : grouped), sub: null, rest: "" };
+	}
+
+	const frac = fracRaw.replace(/0+$/, "");
+	const zeros = frac.length - frac.replace(/^0+/, "").length;
+	const sig = frac.replace(/^0+/, "").slice(0, 4) || "0";
+	// Only collapse to subscript once there are more than 3 leading zeros.
+	if (zeros >= 4) return { lead: `${sign}0.0`, sub: String(zeros), rest: sig };
+	return { lead: `${sign}0.${"0".repeat(zeros)}${sig}`, sub: null, rest: "" };
+}
+
+/** Plain-string token amount (unicode subscript); see TokenAmount for JSX. */
+export function formatTokenDisplay(value: string | number): string {
+	const { lead, sub, rest } = formatTokenParts(value);
+	return sub ? `${lead}${toSubscript(Number(sub))}${rest}` : lead;
+}
+
 /** Parse a USD-ish value (number or "$1,234.56") to a number; 0 when unparseable. */
 export function toUsdNumber(value: unknown): number {
 	if (typeof value === "number") return Number.isFinite(value) ? value : 0;
