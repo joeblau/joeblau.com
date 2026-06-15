@@ -51,6 +51,32 @@ const CHAINS: Record<number, Chain> = {
 	[zora.id]: zora,
 };
 
+/**
+ * Per-chain RPC URLs that allow browser (cross-origin) requests. viem's default
+ * chain RPCs don't — mainnet's `https://eth.merkle.io` returns no
+ * `Access-Control-Allow-Origin`, so the multicall fails from the browser. These
+ * public endpoints (publicnode, plus official endpoints for zkSync/Zora which
+ * publicnode doesn't host) all respond with `access-control-allow-origin: *` on
+ * both the preflight and the POST. Verified 2026-06.
+ */
+const RPC_URLS: Record<number, string> = {
+	[mainnet.id]: "https://ethereum-rpc.publicnode.com",
+	[base.id]: "https://base-rpc.publicnode.com",
+	[arbitrum.id]: "https://arbitrum-one-rpc.publicnode.com",
+	[optimism.id]: "https://optimism-rpc.publicnode.com",
+	[polygon.id]: "https://polygon-bor-rpc.publicnode.com",
+	[bsc.id]: "https://bsc-rpc.publicnode.com",
+	[avalanche.id]: "https://avalanche-c-chain-rpc.publicnode.com",
+	[zksync.id]: "https://mainnet.era.zksync.io",
+	[linea.id]: "https://linea-rpc.publicnode.com",
+	[scroll.id]: "https://scroll-rpc.publicnode.com",
+	[blast.id]: "https://blast-rpc.publicnode.com",
+	[mantle.id]: "https://mantle-rpc.publicnode.com",
+	[gnosis.id]: "https://gnosis-rpc.publicnode.com",
+	[celo.id]: "https://celo-rpc.publicnode.com",
+	[zora.id]: "https://rpc.zora.energy",
+};
+
 const NATIVE = "0x0000000000000000000000000000000000000000";
 
 /** Chains (with catalog tokens) we can read EVM balances on. */
@@ -72,7 +98,10 @@ async function fetchChainHeld(
 	tokens: TokenRow[],
 	user: `0x${string}`,
 ): Promise<TokenRow[]> {
-	const client = createPublicClient({ chain: CHAINS[chainId], transport: http() });
+	const client = createPublicClient({
+		chain: CHAINS[chainId],
+		transport: http(RPC_URLS[chainId]),
+	});
 	const erc20 = tokens.filter((t) => t.address.toLowerCase() !== NATIVE);
 	const native = tokens.find((t) => t.address.toLowerCase() === NATIVE);
 
