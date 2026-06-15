@@ -177,7 +177,7 @@ export function SwapCard() {
 	const [slippage, setSlippage] = useState(0.005);
 	const [slippageOpen, setSlippageOpen] = useState(false);
 	// Real wallet connection via Privy (external EVM/SVM wallets only).
-	const { connected, address, connect } = useWallet();
+	const { connected, address, connect, disconnect } = useWallet();
 	const [genAddress, setGenAddress] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const action = getActionLabel(fromToken, toToken);
@@ -213,13 +213,27 @@ export function SwapCard() {
 	const estimateToUsd =
 		fromToken && toToken ? Math.max(0, fromUsd - FEE_USD) * (1 - slippage) : 0;
 	const estimateToAmount = toToken && toPrice > 0 ? estimateToUsd / toPrice : 0;
-	const toUsd = quote ? quote.out.usd : estimateToUsd;
-	const toAmount = quote ? Number(quote.out.amount) : estimateToAmount;
+	// A "send" (same asset + same chain) is just a transfer: Relay won't quote it
+	// (sender == recipient) and the catalog "to" token carries no price, so the
+	// received side is simply the input amount.
+	const isSend =
+		fromToken !== null &&
+		toToken !== null &&
+		fromToken.chainId === toToken.chainId &&
+		fromToken.address.toLowerCase() === toToken.address.toLowerCase();
+	const toUsd = isSend ? fromUsd : quote ? quote.out.usd : estimateToUsd;
+	const toAmount = isSend
+		? fromUnits
+		: quote
+			? Number(quote.out.amount)
+			: estimateToAmount;
 
 	// Requirements to enable the action: both tokens chosen, a positive amount,
 	// and enough from-balance to cover it. Otherwise disable and show the reason.
 	const fromBalance = fromToken ? Number(fromToken.amount) || 0 : 0;
-	const insufficient = fromToken !== null && fromUnits > fromBalance;
+	// Only gate on balance when it's actually known (>0). Catalog tokens have no
+	// balance until wallet holdings are fetched, so don't block the swap on them.
+	const insufficient = fromBalance > 0 && fromUnits > fromBalance;
 	const canSwap =
 		fromToken !== null && toToken !== null && fromUnits > 0 && !insufficient;
 	const actionLabel =
@@ -415,6 +429,7 @@ export function SwapCard() {
 					connected={connected}
 					walletAddress={address}
 					onConnect={connect}
+					onDisconnect={disconnect}
 					genAddress={genAddress}
 					onToggleGenAddress={() => setGenAddress((v) => !v)}
 					triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4 hover:bg-foreground/[0.03]"
