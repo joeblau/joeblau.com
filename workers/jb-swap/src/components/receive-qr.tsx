@@ -1,13 +1,15 @@
 "use client";
 
-import { QrCode } from "@/components/qr-code";
+import { Cuer } from "cuer";
+
 import { buildPaymentPayload, type PaymentRequest } from "@/lib/eip681";
 import { cn } from "@/lib/utils";
 
 /**
  * A scannable receive QR for an address. Encodes an EIP-681 payment URI for EVM
  * addresses (so a scanning wallet pre-fills the transfer) or the bare address
- * for non-EVM chains. Rendered on a white tile so any wallet camera reads it.
+ * for non-EVM chains. Rendered with cuer (https://cuer.dev) on a white tile so
+ * any wallet camera reads it.
  */
 export function ReceiveQr({
 	request,
@@ -22,7 +24,7 @@ export function ReceiveQr({
 	return (
 		<div className={cn("flex flex-col items-center gap-3", className)}>
 			<div className="rounded-2xl bg-white p-3 shadow-sm">
-				<QrCode value={payload} size={size} foreground="#000000" background="#ffffff" />
+				<Cuer value={payload} size={size} color="#000000" />
 			</div>
 			<code className="max-w-[16rem] break-all text-center text-xs text-muted-foreground">
 				{request.address}
