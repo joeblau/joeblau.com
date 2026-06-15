@@ -4,7 +4,7 @@
     "source": "Conquer Earth",
     "url": "https://conquer.earth/joeblau/places",
     "api": "1.0",
-    "count": "305",
+    "count": "306",
     "generated_at": "1768454824"
   },
   "features": [
@@ -3971,6 +3971,19 @@
         "type": "Route",
         "description": "",
         "token": "3zZCrASsV4NdkTJtYhoKwe"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-63.0501, 18.0708]
+      },
+      "properties": {
+        "title": "Saint Martin",
+        "type": "Country",
+        "description": null,
+        "token": "AbuegL86NXSGZOGjx265gL"
       }
     }
   ]
