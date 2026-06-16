@@ -6,17 +6,47 @@ import { useEffect, useState } from "react";
 
 import { HapticButton } from "@/components/haptic-button";
 import { useTranslations } from "@/i18n/locale-provider";
-
-/**
- * Numeric keypad shown only in mobile-width viewports (below md). It animates
- * in when the viewport compresses to mobile and out when it widens. Keys emit
- * "0"-"9", ".", or "back" to the parent.
- */
+import { cn } from "@/lib/utils";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
 
-export function MobileKeypad({ onKey }: { onKey: (key: string) => void }) {
+/**
+ * The bare numeric keypad grid. Always rendered (use this where the keypad
+ * should be permanently visible, e.g. inside the slippage panel). Keys emit
+ * "0"-"9", ".", or "back" to the parent.
+ */
+export function Keypad({
+	onKey,
+	className,
+}: {
+	onKey: (key: string) => void;
+	className?: string;
+}) {
 	const t = useTranslations();
+	return (
+		<div className={cn("grid grid-cols-3", className)}>
+			{KEYS.map((k) => (
+				<HapticButton
+					key={k}
+					wrapperClassName="grid"
+					type="button"
+					onClick={() => onKey(k)}
+					aria-label={k === "back" ? t("keypad.deleteKeyAriaLabel") : k}
+					className="flex h-14 items-center justify-center rounded-2xl text-2xl font-semibold text-foreground transition-colors active:bg-foreground/10"
+				>
+					{k === "back" ? <Delete className="size-6" /> : k}
+				</HapticButton>
+			))}
+		</div>
+	);
+}
+
+/**
+ * The keypad, shown only in mobile-width viewports (below md). It animates in
+ * when the viewport compresses to mobile and out when it widens. Used by the
+ * swap card, where desktop drives the amount via the physical keyboard instead.
+ */
+export function MobileKeypad({ onKey }: { onKey: (key: string) => void }) {
 	const [isMobile, setIsMobile] = useState(false);
 
 	useEffect(() => {
@@ -37,20 +67,7 @@ export function MobileKeypad({ onKey }: { onKey: (key: string) => void }) {
 					transition={{ duration: 0.12, ease: "easeOut" }}
 					className="overflow-hidden"
 				>
-					<div className="grid grid-cols-3 pt-2">
-						{KEYS.map((k) => (
-							<HapticButton
-								key={k}
-								wrapperClassName="grid"
-								type="button"
-								onClick={() => onKey(k)}
-								aria-label={k === "back" ? t("keypad.deleteKeyAriaLabel") : k}
-								className="flex h-14 items-center justify-center rounded-2xl text-2xl font-semibold text-foreground transition-colors active:bg-foreground/10"
-							>
-								{k === "back" ? <Delete className="size-6" /> : k}
-							</HapticButton>
-						))}
-					</div>
+					<Keypad onKey={onKey} className="pt-2" />
 				</motion.div>
 			)}
 		</AnimatePresence>

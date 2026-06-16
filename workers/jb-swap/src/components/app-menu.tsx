@@ -10,11 +10,18 @@ import {
 	SegmentedControl,
 	type SegmentOption,
 } from "@/components/segmented-control";
+import {
+	FeeBreakdownPanel,
+	FeeBreakdownRow,
+	SlippageControls,
+	SlippageRow,
+} from "@/components/settings-panels";
 import { ThemeSegmentedControl } from "@/components/theme-segmented-control";
 import { useLocale, useTranslations } from "@/i18n/locale-provider";
+import type { NormalizedQuoteFees } from "@/lib/relay";
 import { cn } from "@/lib/utils";
 
-type View = "menu" | "language";
+type View = "menu" | "language" | "slippage" | "fees";
 
 export type Denomination = "usd" | "units";
 
@@ -37,10 +44,20 @@ export function AppMenu({
 	className,
 	denomination,
 	onDenominationChange,
+	slippage,
+	onSlippageChange,
+	fees,
+	feeLoading,
 }: {
 	className?: string;
 	denomination: Denomination;
 	onDenominationChange: (value: Denomination) => void;
+	/** Slippage tolerance (fraction, e.g. 0.005 = 0.5%) + its setter. */
+	slippage: number;
+	onSlippageChange: (value: number) => void;
+	/** Live quote fee breakdown (null until a quote resolves). */
+	fees: NormalizedQuoteFees | null;
+	feeLoading?: boolean;
 }) {
 	const t = useTranslations();
 	const { locale, setLocale } = useLocale();
@@ -90,7 +107,7 @@ export function AppMenu({
 					<div className="flex flex-col gap-4 px-3 pb-8 pt-4">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-1">
-								{view === "language" && (
+								{view !== "menu" && (
 									<button
 										type="button"
 										aria-label={t("menu.backAriaLabel")}
@@ -103,7 +120,11 @@ export function AppMenu({
 								<Drawer.Title className="text-2xl font-bold text-foreground">
 									{view === "language"
 										? t("menu.titleLanguage")
-										: t("menu.titleMenu")}
+										: view === "slippage"
+											? t("slippage.title")
+											: view === "fees"
+												? t("menu.feeBreakdown")
+												: t("menu.titleMenu")}
 								</Drawer.Title>
 							</div>
 							<Drawer.Close className="flex size-9 cursor-pointer items-center justify-center rounded-full bg-foreground/10 text-muted-foreground transition-colors hover:bg-foreground/15">
@@ -120,11 +141,21 @@ export function AppMenu({
 										go("menu");
 									}}
 								/>
+							) : view === "slippage" ? (
+								<SlippageControls value={slippage} onChange={onSlippageChange} />
+							) : view === "fees" ? (
+								<FeeBreakdownPanel fees={fees} loading={feeLoading} />
 							) : (
 								<div className="flex flex-col gap-4">
 									<LanguageRow
 										value={locale}
 										onOpen={() => go("language")}
+									/>
+									<SlippageRow value={slippage} onOpen={() => go("slippage")} />
+									<FeeBreakdownRow
+										total={fees?.totalUsd ?? null}
+										loading={feeLoading}
+										onOpen={() => go("fees")}
 									/>
 									<ThemeSegmentedControl />
 									<SegmentedControl
