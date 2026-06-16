@@ -1,7 +1,15 @@
 "use client";
 
 import NumberFlow from "@number-flow/react";
-import { ChevronRight, Receipt, SlidersHorizontal } from "lucide-react";
+import {
+	ArrowLeftRight,
+	Check,
+	ChevronRight,
+	Receipt,
+	SlidersHorizontal,
+	Target,
+	Zap,
+} from "lucide-react";
 import { useState } from "react";
 
 import { HapticButton } from "@/components/haptic-button";
@@ -9,6 +17,8 @@ import { Keypad } from "@/components/keypad";
 import { useTranslations } from "@/i18n/locale-provider";
 import type { NormalizedQuoteFees } from "@/lib/relay";
 import { cn } from "@/lib/utils";
+
+export type OrderType = "market" | "limit";
 
 /**
  * Settings pieces pushed into the AppMenu sheet (mirroring the language
@@ -213,6 +223,82 @@ export function FeeBreakdownPanel({
 					{fmtUsd(fees.totalUsd)}
 				</span>
 			</div>
+		</div>
+	);
+}
+
+/** Menu row that opens the order-type picker; shows the current type. */
+export function OrderRow({
+	value,
+	onOpen,
+}: {
+	value: OrderType;
+	onOpen: () => void;
+}) {
+	const t = useTranslations();
+	return (
+		<SettingsRow
+			icon={ArrowLeftRight}
+			label={t("menu.order")}
+			value={value === "market" ? t("order.market") : t("order.limit")}
+			onOpen={onOpen}
+		/>
+	);
+}
+
+/** The pushed-in order-type view: Market / Limit, each with a description. */
+export function OrderPanel({
+	value,
+	onSelect,
+}: {
+	value: OrderType;
+	onSelect: (value: OrderType) => void;
+}) {
+	const t = useTranslations();
+	const options = [
+		{
+			value: "market" as const,
+			icon: Zap,
+			label: t("order.market"),
+			desc: t("order.marketDesc"),
+		},
+		{
+			value: "limit" as const,
+			icon: Target,
+			label: t("order.limit"),
+			desc: t("order.limitDesc"),
+		},
+	];
+	return (
+		<div className="flex flex-col gap-2">
+			{options.map((o) => {
+				const selected = o.value === value;
+				return (
+					<HapticButton
+						key={o.value}
+						type="button"
+						wrapperClassName="block w-full"
+						onClick={() => onSelect(o.value)}
+						className={cn(
+							"flex w-full items-start gap-3 rounded-2xl p-3 text-left transition-colors",
+							selected
+								? "bg-foreground/10"
+								: "bg-foreground/[0.06] hover:bg-foreground/10",
+						)}
+					>
+						<o.icon className="mt-0.5 size-5 shrink-0 text-foreground" />
+						<div className="min-w-0 flex-1">
+							<p className="font-semibold text-foreground">{o.label}</p>
+							<p className="text-sm leading-snug text-muted-foreground">
+								{o.desc}
+							</p>
+						</div>
+						{selected && (
+							<Check className="mt-0.5 size-5 shrink-0 text-foreground" />
+						)}
+					</HapticButton>
+				);
+			})}
 		</div>
 	);
 }
