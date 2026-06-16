@@ -635,6 +635,10 @@ export function SwapCard() {
 				<AppMenu
 					denomination={denomination}
 					onDenominationChange={handleDenominationChange}
+					slippage={slippage}
+					onSlippageChange={setSlippage}
+					fees={quote?.fees ?? null}
+					feeLoading={quoteLoading}
 				/>
 				<HapticButton
 					wrapperClassName="grid flex-1"
