@@ -182,8 +182,8 @@ export function AppMenu({
 										onChange={onDenominationChange}
 										layoutId="denomination-segment-pill"
 									/>
-									<div className="flex flex-col gap-2">
-										<h3 className="px-2 pt-1 text-sm font-semibold text-muted-foreground">
+									<div className="flex flex-col gap-4">
+										<h3 className="-mb-2 px-2 text-sm font-semibold text-muted-foreground">
 											{t("menu.sectionTransaction")}
 										</h3>
 										<OrderRow
