@@ -13,6 +13,9 @@ import {
 import {
 	FeeBreakdownPanel,
 	FeeBreakdownRow,
+	OrderPanel,
+	OrderRow,
+	type OrderType,
 	SlippageControls,
 	SlippageRow,
 } from "@/components/settings-panels";
@@ -21,7 +24,7 @@ import { useLocale, useTranslations } from "@/i18n/locale-provider";
 import type { NormalizedQuoteFees } from "@/lib/relay";
 import { cn } from "@/lib/utils";
 
-type View = "menu" | "language" | "slippage" | "fees";
+type View = "menu" | "language" | "order" | "slippage" | "fees";
 
 export type Denomination = "usd" | "units";
 
@@ -44,6 +47,8 @@ export function AppMenu({
 	className,
 	denomination,
 	onDenominationChange,
+	orderType,
+	onOrderTypeChange,
 	slippage,
 	onSlippageChange,
 	fees,
@@ -52,6 +57,9 @@ export function AppMenu({
 	className?: string;
 	denomination: Denomination;
 	onDenominationChange: (value: Denomination) => void;
+	/** Order type (market | limit) + its setter. */
+	orderType: OrderType;
+	onOrderTypeChange: (value: OrderType) => void;
 	/** Slippage tolerance (fraction, e.g. 0.005 = 0.5%) + its setter. */
 	slippage: number;
 	onSlippageChange: (value: number) => void;
@@ -120,11 +128,13 @@ export function AppMenu({
 								<Drawer.Title className="text-2xl font-bold text-foreground">
 									{view === "language"
 										? t("menu.titleLanguage")
-										: view === "slippage"
-											? t("slippage.title")
-											: view === "fees"
-												? t("menu.feeBreakdown")
-												: t("menu.titleMenu")}
+										: view === "order"
+											? t("menu.order")
+											: view === "slippage"
+												? t("slippage.title")
+												: view === "fees"
+													? t("menu.feeBreakdown")
+													: t("menu.titleMenu")}
 								</Drawer.Title>
 							</div>
 							<Drawer.Close className="flex size-9 cursor-pointer items-center justify-center rounded-full bg-foreground/10 text-muted-foreground transition-colors hover:bg-foreground/15">
@@ -141,6 +151,14 @@ export function AppMenu({
 										go("menu");
 									}}
 								/>
+							) : view === "order" ? (
+								<OrderPanel
+									value={orderType}
+									onSelect={(next) => {
+										onOrderTypeChange(next);
+										go("menu");
+									}}
+								/>
 							) : view === "slippage" ? (
 								<SlippageControls value={slippage} onChange={onSlippageChange} />
 							) : view === "fees" ? (
@@ -150,12 +168,6 @@ export function AppMenu({
 									<LanguageRow
 										value={locale}
 										onOpen={() => go("language")}
-									/>
-									<SlippageRow value={slippage} onOpen={() => go("slippage")} />
-									<FeeBreakdownRow
-										total={fees?.totalUsd ?? null}
-										loading={feeLoading}
-										onOpen={() => go("fees")}
 									/>
 									<ThemeSegmentedControl />
 									<SegmentedControl
@@ -170,6 +182,24 @@ export function AppMenu({
 										onChange={onDenominationChange}
 										layoutId="denomination-segment-pill"
 									/>
+									<div className="flex flex-col gap-2">
+										<h3 className="px-2 pt-1 text-sm font-semibold text-muted-foreground">
+											{t("menu.sectionTransaction")}
+										</h3>
+										<OrderRow
+											value={orderType}
+											onOpen={() => go("order")}
+										/>
+										<SlippageRow
+											value={slippage}
+											onOpen={() => go("slippage")}
+										/>
+										<FeeBreakdownRow
+											total={fees?.totalUsd ?? null}
+											loading={feeLoading}
+											onOpen={() => go("fees")}
+										/>
+									</div>
 								</div>
 							)}
 						</ResizablePanel>

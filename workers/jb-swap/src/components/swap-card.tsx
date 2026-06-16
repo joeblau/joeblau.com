@@ -11,6 +11,7 @@ import { CryptoAddress } from "@/components/crypto-address";
 import { HapticButton } from "@/components/haptic-button";
 import { MobileKeypad } from "@/components/keypad";
 import { SlippageDrawer } from "@/components/slippage-drawer";
+import type { OrderType } from "@/components/settings-panels";
 import { price, TokenBox, type TokenRow } from "@/components/token-drawer";
 import { buildPaymentPayload } from "@/lib/eip681";
 import { useTranslations } from "@/i18n/locale-provider";
@@ -214,6 +215,7 @@ export function SwapCard() {
 	const [toMode, setToMode] = useState<"token" | "usd">(defaultMode);
 	const [slippage, setSlippage] = useState(0.005);
 	const [slippageOpen, setSlippageOpen] = useState(false);
+	const [orderType, setOrderType] = useState<OrderType>("market");
 	// Real wallet connection via Privy (external EVM/SVM wallets only).
 	const { connected, address, connect, disconnect } = useWallet();
 	const [genAddress, setGenAddress] = useState(false);
@@ -635,6 +637,8 @@ export function SwapCard() {
 				<AppMenu
 					denomination={denomination}
 					onDenominationChange={handleDenominationChange}
+					orderType={orderType}
+					onOrderTypeChange={setOrderType}
 					slippage={slippage}
 					onSlippageChange={setSlippage}
 					fees={quote?.fees ?? null}
