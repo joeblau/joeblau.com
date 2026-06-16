@@ -180,15 +180,20 @@ function SelectedMeta({
 	token,
 	onSetAmount,
 	slippage,
+	fee,
+	feeLoading,
 	onOpenSlippage,
 }: {
 	variant: Variant;
 	token: TokenRow;
 	onSetAmount?: (amount: string) => void;
 	slippage?: number;
+	fee?: number | null;
+	feeLoading?: boolean;
 	onOpenSlippage?: () => void;
 }) {
 	const t = useTranslations();
+	const feeAmount = feeLoading ? "…" : fee != null ? `$${fee.toFixed(2)}` : "—";
 	if (variant === "to") {
 		return (
 			<div className="flex flex-col items-end gap-2">
@@ -201,7 +206,9 @@ function SelectedMeta({
 					<SlidersHorizontal className="size-3.5" />
 					{t("tokenDrawer.meta.slippage", { percent: formatPct(slippage ?? 0.005) })}
 				</ClickablePill>
-				<span className="text-sm text-muted-foreground">{t("tokenDrawer.meta.fee")}</span>
+				<span className="text-sm text-muted-foreground">
+					{t("tokenDrawer.meta.fee", { amount: feeAmount })}
+				</span>
 			</div>
 		);
 	}
@@ -234,6 +241,8 @@ function SelectedHeader({
 	walletAddress,
 	onSetAmount,
 	slippage,
+	fee,
+	feeLoading,
 	onOpenSlippage,
 }: {
 	variant: Variant;
@@ -241,6 +250,8 @@ function SelectedHeader({
 	walletAddress?: string | null;
 	onSetAmount?: (amount: string) => void;
 	slippage?: number;
+	fee?: number | null;
+	feeLoading?: boolean;
 	onOpenSlippage?: () => void;
 }) {
 	return (
@@ -260,6 +271,8 @@ function SelectedHeader({
 				token={token}
 				onSetAmount={onSetAmount}
 				slippage={slippage}
+				fee={fee}
+				feeLoading={feeLoading}
 				onOpenSlippage={onOpenSlippage}
 			/>
 		</div>
@@ -273,6 +286,8 @@ export function TokenBox({
 	onSelect,
 	onSetAmount,
 	slippage,
+	fee,
+	feeLoading,
 	onOpenSlippage,
 	connected,
 	walletAddress,
@@ -288,6 +303,10 @@ export function TokenBox({
 	onSelect?: (token: TokenRow) => void;
 	onSetAmount?: (amount: string) => void;
 	slippage?: number;
+	/** Live total fee in USD from the quote (null until it resolves / for sends). */
+	fee?: number | null;
+	/** Whether a fresh quote is loading (so the fee can show a placeholder). */
+	feeLoading?: boolean;
 	onOpenSlippage?: () => void;
 	connected?: boolean;
 	/** Connected wallet address (EVM or Solana), or null when disconnected. */
@@ -452,6 +471,8 @@ export function TokenBox({
 									walletAddress={walletAddress}
 									onSetAmount={onSetAmount}
 									slippage={slippage}
+									fee={fee}
+									feeLoading={feeLoading}
 									onOpenSlippage={onOpenSlippage}
 								/>
 							</motion.div>

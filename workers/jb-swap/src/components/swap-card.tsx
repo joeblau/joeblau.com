@@ -34,7 +34,8 @@ function getActionLabel(from: TokenRow | null, to: TokenRow | null) {
 	return "send";
 }
 
-/** Quote constant — must match the "Fee $0.25" shown in SelectedMeta. */
+/** Rough fee for the preview "to" amount only, before a live quote resolves.
+ * The displayed fee is the real `quote.fees.totalUsd`. */
 const FEE_USD = 0.25;
 
 /** Placeholder receive address shown before a wallet is connected (a well-known example address). */
@@ -266,7 +267,7 @@ export function SwapCard() {
 					tradeType: "EXACT_INPUT",
 				}
 			: null;
-	const { quote } = useSwapQuote(quoteRequest);
+	const { quote, loading: quoteLoading } = useSwapQuote(quoteRequest);
 
 	const toPrice = toToken ? price(toToken) : 0;
 	const estimateToUsd =
@@ -286,6 +287,9 @@ export function SwapCard() {
 		: quote
 			? Number(quote.out.amount)
 			: estimateToAmount;
+	// Real, live total fee (gas + relayer + app) from the quote. null until a
+	// quote resolves; a same-chain send isn't quoted so it carries no Relay fee.
+	const feeUsd = isSend ? null : quote ? quote.fees.totalUsd : null;
 
 	// Requirements to enable the action: both tokens chosen, a positive amount,
 	// and enough from-balance to cover it. Otherwise disable and show the reason.
@@ -295,8 +299,9 @@ export function SwapCard() {
 	const insufficient = fromBalance > 0 && fromUnits > fromBalance;
 	const canSwap =
 		fromToken !== null && toToken !== null && fromUnits > 0 && !insufficient;
-	const actionLabel =
-		fromToken === null || toToken === null
+	const actionLabel = genAddress
+		? t("swapCard.actionLabel.sendFromWallet")
+		: fromToken === null || toToken === null
 			? t("swapCard.actionLabel.selectToken")
 			: fromUnits <= 0
 				? t("swapCard.actionLabel.enterAmount")
@@ -366,7 +371,14 @@ export function SwapCard() {
 	// quote hasn't resolved yet we fall back to the preview animation.
 	const exec = useExecuteSwap();
 	const handleSubmit = () => {
-		if (!canSwap || submitting) return;
+		if (submitting) return;
+		// Generate-address mode: the CTA is "Send from your wallet" — connecting
+		// is the action (no amount/quote gating).
+		if (genAddress) {
+			if (!connected) connect();
+			return;
+		}
+		if (!canSwap) return;
 		if (!connected) {
 			connect();
 			return;
@@ -581,6 +593,8 @@ export function SwapCard() {
 					onSelect={setToToken}
 					walletAddress={address}
 					slippage={slippage}
+					fee={feeUsd}
+					feeLoading={quoteLoading}
 					onOpenSlippage={() => setSlippageOpen(true)}
 					triggerClassName={cn(
 						"-mx-4 -mt-6 w-[calc(100%+2rem)] px-4 pb-4 pt-6 hover:bg-foreground/[0.03]",
@@ -626,7 +640,7 @@ export function SwapCard() {
 					wrapperClassName="grid flex-1"
 					type="button"
 					onClick={handleSubmit}
-					disabled={!canSwap || submitting}
+					disabled={submitting || (!genAddress && !canSwap)}
 					className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-secondary/40 disabled:text-muted-foreground disabled:hover:bg-secondary/40 disabled:active:scale-100"
 				>
 					{submitting ? t("swapCard.submit.confirming") : actionLabel}

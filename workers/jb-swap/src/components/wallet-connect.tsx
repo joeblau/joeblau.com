@@ -23,12 +23,12 @@ export function ConnectWalletControl({
 	className?: string;
 }) {
 	return (
-		<div className={cn("flex h-12 w-full items-stretch gap-0.5", className)}>
+		<div className={cn("flex h-12 w-full items-stretch gap-2", className)}>
 			<HapticButton
 				type="button"
 				onClick={onConnect}
 				wrapperClassName="grid flex-1"
-				className="flex size-full items-center justify-center gap-2 rounded-l-full rounded-r-md bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99]"
+				className="flex size-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99]"
 			>
 				<Wallet className="size-4" />
 				Connect Wallet
@@ -39,7 +39,7 @@ export function ConnectWalletControl({
 				aria-checked={genAddress}
 				onClick={onToggleGenAddress}
 				wrapperClassName="grid"
-				className="flex items-center gap-2.5 rounded-l-md rounded-r-full bg-foreground/[0.08] px-4 text-sm font-medium text-foreground transition-colors hover:bg-foreground/[0.12]"
+				className="flex items-center gap-2.5 rounded-full bg-foreground/[0.08] px-4 text-sm font-medium text-foreground transition-colors hover:bg-foreground/[0.12]"
 			>
 				Generate Address
 				<span
