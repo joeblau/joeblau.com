@@ -21,6 +21,7 @@ export const PREVIEW_USER = "0x000000000000000000000000000000000000dEaD";
 export function useSwapQuote(
 	request: QuoteRequest | null,
 	debounceMs = 400,
+	refreshMs = 15000,
 ): SwapQuoteState {
 	const [state, setState] = useState<SwapQuoteState>({
 		quote: null,
@@ -67,6 +68,25 @@ export function useSwapQuote(
 		return () => clearTimeout(timer);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [key, debounceMs]);
+
+	// Keep the quote/fees fresh — Relay prices, gas, and route fees move and
+	// quotes expire. Re-fetch on an interval while a request is active, silently
+	// (no loading flicker; the prior quote stays until the new one arrives).
+	useEffect(() => {
+		if (!key || !request || refreshMs <= 0) return;
+		const iv = setInterval(() => {
+			const id = ++seq.current;
+			getSwapQuote({ ...request, user: request.user || PREVIEW_USER })
+				.then((quote) => {
+					if (id === seq.current) setState({ quote, loading: false, error: null });
+				})
+				.catch(() => {
+					// Keep the prior quote on a refresh failure.
+				});
+		}, refreshMs);
+		return () => clearInterval(iv);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [key, refreshMs]);
 
 	return state;
 }
