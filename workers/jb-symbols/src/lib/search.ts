@@ -10,6 +10,7 @@ const FIELDS = [
 	"useCases",
 	"style",
 	"description",
+	"section",
 	"company",
 	"industry",
 	"country",
@@ -19,6 +20,7 @@ const FIELDS = [
 const BOOST: Record<string, number> = {
 	primarySubject: 6,
 	subjects: 4,
+	section: 4,
 	company: 4,
 	letters: 3,
 	useCases: 2,
@@ -40,6 +42,7 @@ function toDoc(s: SymbolRecord) {
 		useCases: s.useCases.join(" "),
 		style: s.style.join(" "),
 		description: s.description,
+		section: s.section ?? "",
 		company: s.company ?? "",
 		industry: s.industry ?? "",
 		country: s.country ?? "",

@@ -45,6 +45,7 @@ export function SymbolDetail({
 
 	const meta: [string, string | undefined][] = [
 		["Company", symbol.company],
+		["Category", symbol.section],
 		["Industry", symbol.industry],
 		["Designer", symbol.designers?.join(", ")],
 		["Country", symbol.country],
