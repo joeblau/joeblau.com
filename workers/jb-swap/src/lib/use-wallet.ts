@@ -1,6 +1,6 @@
 "use client";
 
-import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useConnectWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets } from "@privy-io/react-auth/solana";
 import type { AdaptedWallet } from "@relayprotocol/relay-sdk";
 import { useCallback, useSyncExternalStore } from "react";
@@ -19,9 +19,11 @@ import {
  * embedded/smart wallets are involved — see {@link WalletProvider}.
  */
 export function useWallet() {
-	const { ready, login, logout } = usePrivy();
+	const { ready, authenticated, logout } = usePrivy();
 	const { wallets: evmWallets } = useWallets();
 	const { wallets: solanaWallets } = useSolanaWallets();
+	// Connector-only wallet connect (no SIWE/SIWS identity auth — see `connect`).
+	const { connectWallet } = useConnectWallet();
 
 	const evmWallet = evmWallets[0];
 	const solanaWallet = solanaWallets[0];
@@ -57,17 +59,19 @@ export function useWallet() {
 		address,
 		evmAddress: manuallyDisconnected ? null : (evmWallet?.address ?? null),
 		solanaAddress: manuallyDisconnected ? null : (solanaWallet?.address ?? null),
-		// Clear the override first so a connection can re-surface, then open
-		// Privy's login modal. We ALWAYS open the modal rather than silently
-		// re-using a wallet that's still connected at the connector level: after a
-		// "log out" the injected wallet often persists (see `disconnect` below),
-		// and reconnecting it with no prompt makes logout feel broken and prevents
-		// switching wallets. `login()` (vs `connectWallet()`) creates an
-		// authenticated session so the eventual `logout()` has something real to
-		// destroy (avoids the connect-only `POST /sessions/logout` 400).
+		// Open the external-wallet picker. We use Privy's `connectWallet`
+		// (connector-only) rather than `login()` so we DON'T trigger SIWE/SIWS
+		// identity authentication: a swap only needs a connected wallet to sign
+		// transactions, and the authenticate step was failing against this Privy
+		// app (SIWE `init` 403, then SIWS `authenticate` 400). Nothing here reads
+		// Privy's `authenticated`/`user` — the address comes from the connector
+		// (`useWallets`), which `connectWallet` populates without a user session.
+		// We always open the picker (after clearing the override) rather than
+		// silently re-using a still-connected wallet, so "log out → connect"
+		// re-prompts and lets the user switch wallets.
 		connect: () => {
 			clearManualDisconnect();
-			login();
+			connectWallet();
 		},
 		// Real disconnect. Flip the local override first so the UI returns to the
 		// connect screen immediately and reliably. Then best-effort sever the
@@ -77,9 +81,10 @@ export function useWallet() {
 		// `wallet_revokePermissions`). MetaMask / Rabby honor this and actually
 		// drop the connection, so the next connect re-prompts for approval; wallets
 		// that don't support it stay hidden behind the override. Solana wallets
-		// (Phantom) support programmatic `disconnect()`. Finally tear down the
-		// Privy session — a 400 on a stale/never-authenticated session is harmless,
-		// Privy still clears local tokens — so swallow it.
+		// (Phantom) support programmatic `disconnect()`. Only tear down a Privy
+		// session if one actually exists — with connector-only `connectWallet`
+		// there usually isn't one, and calling `logout()` with no authenticated
+		// user 400s ("Error destroying session").
 		disconnect: async () => {
 			setManualDisconnect();
 			if (evmWallet) {
@@ -96,7 +101,7 @@ export function useWallet() {
 			}
 			void evmWallet?.disconnect?.();
 			void solanaWallet?.disconnect?.();
-			void logout().catch(() => {});
+			if (authenticated) void logout().catch(() => {});
 		},
 		getAdaptedWallet,
 	};
