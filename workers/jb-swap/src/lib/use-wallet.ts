@@ -57,25 +57,43 @@ export function useWallet() {
 		address,
 		evmAddress: manuallyDisconnected ? null : (evmWallet?.address ?? null),
 		solanaAddress: manuallyDisconnected ? null : (solanaWallet?.address ?? null),
-		// Clear the override first so the wallet re-surfaces, then open Privy's
-		// login modal. `login()` (vs `connectWallet()`) creates an authenticated
-		// session so the eventual `logout()` has something real to destroy
-		// (avoids the connect-only `POST /sessions/logout` 400). If a wallet is
-		// already connected at the provider level, just clearing the override
-		// reconnects instantly with no redundant modal.
+		// Clear the override first so a connection can re-surface, then open
+		// Privy's login modal. We ALWAYS open the modal rather than silently
+		// re-using a wallet that's still connected at the connector level: after a
+		// "log out" the injected wallet often persists (see `disconnect` below),
+		// and reconnecting it with no prompt makes logout feel broken and prevents
+		// switching wallets. `login()` (vs `connectWallet()`) creates an
+		// authenticated session so the eventual `logout()` has something real to
+		// destroy (avoids the connect-only `POST /sessions/logout` 400).
 		connect: () => {
 			clearManualDisconnect();
-			if (rawAddress === null) login();
+			login();
 		},
-		// Injected wallets (MetaMask/Phantom) can't be programmatically
-		// disconnected and Privy's `useWallets()` isn't gated on auth, so neither
-		// `wallet.disconnect()` nor `logout()` clears the list. Flip the local
-		// override first (the UI returns to connect immediately and reliably),
-		// then best-effort tear down the connector + Privy session for any wallet
-		// that *does* support it. The logout 400 on a stale session is harmless —
+		// Real disconnect. Flip the local override first so the UI returns to the
+		// connect screen immediately and reliably. Then best-effort sever the
+		// underlying connection: injected EVM wallets ignore connector
+		// `disconnect()` and Privy's `useWallets()` isn't gated on auth, so we ask
+		// the provider to revoke the dApp's account permission (EIP-2255
+		// `wallet_revokePermissions`). MetaMask / Rabby honor this and actually
+		// drop the connection, so the next connect re-prompts for approval; wallets
+		// that don't support it stay hidden behind the override. Solana wallets
+		// (Phantom) support programmatic `disconnect()`. Finally tear down the
+		// Privy session — a 400 on a stale/never-authenticated session is harmless,
 		// Privy still clears local tokens — so swallow it.
-		disconnect: () => {
+		disconnect: async () => {
 			setManualDisconnect();
+			if (evmWallet) {
+				try {
+					const provider = await evmWallet.getEthereumProvider();
+					await provider.request({
+						method: "wallet_revokePermissions",
+						params: [{ eth_accounts: {} }],
+					});
+				} catch {
+					// Wallet doesn't support permission revocation — the override
+					// keeps it hidden until the page is refreshed.
+				}
+			}
 			void evmWallet?.disconnect?.();
 			void solanaWallet?.disconnect?.();
 			void logout().catch(() => {});

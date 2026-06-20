@@ -1,18 +1,23 @@
 "use client";
 
-import NumberFlow from "@number-flow/react";
 import { motion } from "framer-motion";
 import { ArrowUpDown, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { AppleBorderGradient } from "@/components/apple-border-gradient";
 import { AppMenu, type Denomination, DENOMINATION_KEY } from "@/components/app-menu";
-import { CryptoAddress } from "@/components/crypto-address";
 import { HapticButton } from "@/components/haptic-button";
 import { MobileKeypad } from "@/components/keypad";
 import { SlippageDrawer } from "@/components/slippage-drawer";
 import type { OrderType } from "@/components/settings-panels";
-import { price, TokenBox, type TokenRow } from "@/components/token-drawer";
+import {
+	sanitizeAmount,
+	trim,
+	trimUsd,
+} from "@/components/swap-field";
+import { SwapFrom } from "@/components/swap-from";
+import { SwapTo } from "@/components/swap-to";
+import { price, type TokenRow } from "@/components/token-drawer";
 import { buildPaymentPayload } from "@/lib/eip681";
 import { useTranslations } from "@/i18n/locale-provider";
 import { usePersistentState } from "@/lib/use-persistent-state";
@@ -42,162 +47,6 @@ const FEE_USD = 0.25;
 /** Placeholder receive address shown before a wallet is connected (a well-known example address). */
 const PREVIEW_ADDRESS = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
 
-/** Trim a number to a clean string (drops trailing zeros, caps at 8 decimals). */
-function trim(n: number) {
-	return String(Number(n.toFixed(8)));
-}
-
-/** Trim a USD value to a clean string, capped at 2 decimal places. */
-function trimUsd(n: number) {
-	return String(Number(n.toFixed(2)));
-}
-
-/**
- * The animated value inside a conversion Pill. In "token" mode the field is
- * entered in token units so the pill shows the USD equivalent ($, 2dp); in
- * "usd" mode it shows the token amount + symbol (up to 8dp, no grouping).
- * NumberFlow animates digit changes the same way the main AmountInput does.
- */
-function ConversionValue({
-	mode,
-	usd,
-	units,
-	symbol,
-}: {
-	mode: "token" | "usd";
-	usd: number;
-	units: number;
-	symbol: string;
-}) {
-	if (mode === "token") {
-		return (
-			<NumberFlow
-				value={usd}
-				prefix="$"
-				format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
-				className="overflow-hidden [--number-flow-mask-height:0px]"
-			/>
-		);
-	}
-	return (
-		<NumberFlow
-			value={units}
-			suffix={symbol ? ` ${symbol}` : ""}
-			format={{ maximumFractionDigits: 8, useGrouping: false }}
-			className="overflow-hidden [--number-flow-mask-height:0px]"
-		/>
-	);
-}
-
-function Pill({
-	onClick,
-	children,
-}: {
-	onClick?: () => void;
-	children: React.ReactNode;
-}) {
-	return (
-		<HapticButton
-			type="button"
-			onClick={onClick}
-			wrapperClassName="pointer-events-auto inline-grid"
-			className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.07] px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-foreground/[0.12]"
-		>
-			{children}
-		</HapticButton>
-	);
-}
-
-/** Keep only digits and a single decimal point; strip leading zeros. */
-function sanitizeAmount(raw: string) {
-	let v = raw.replace(/[^0-9.]/g, "");
-	const dot = v.indexOf(".");
-	if (dot !== -1) {
-		v = v.slice(0, dot + 1) + v.slice(dot + 1).replace(/\./g, "");
-	}
-	v = v.replace(/^0+(\d)/, "$1");
-	return v === "" || v === "." ? "0" : v;
-}
-
-/**
- * Animated amount display. Typing, the keypad, and paste are handled globally
- * by SwapCard and always drive the "from" amount.
- */
-function AmountInput({
-	value,
-	prefix,
-	muted,
-	sizeClassName = "text-3xl md:text-5xl",
-}: {
-	value: string;
-	prefix?: string;
-	muted?: boolean;
-	sizeClassName?: string;
-}) {
-	const t = useTranslations();
-	// Dollar values ($ prefix) never show more than 2 decimals; token amounts up to 8.
-	const maxFraction = prefix === "$" ? 2 : 8;
-	const dot = value.indexOf(".");
-	const fractionDigits =
-		dot === -1 ? 0 : Math.min(value.length - dot - 1, maxFraction);
-	return (
-		<div
-			role="textbox"
-			aria-label={t("swapCard.amountInput.ariaLabel")}
-			tabIndex={0}
-			className="cursor-text overflow-hidden rounded-lg outline-none"
-		>
-			<NumberFlow
-				value={Number(value) || 0}
-				prefix={prefix}
-				suffix={value.endsWith(".") ? "." : ""}
-				format={{
-					minimumFractionDigits: fractionDigits,
-					maximumFractionDigits: maxFraction,
-					useGrouping: false,
-				}}
-				className={cn(
-					"font-bold tracking-tight [--number-flow-mask-height:0px]",
-					sizeClassName,
-					muted ? "text-muted-foreground" : "text-foreground",
-				)}
-			/>
-		</div>
-	);
-}
-
-/** Shared CSS height transition for the animated amount fields. */
-const AMOUNT_FIELD_TRANSITION =
-	"overflow-hidden transition-[height] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
-
-/**
- * Measures the natural (content-box) height of an element and keeps it current
- * across breakpoint/value changes via a ResizeObserver. Returns the ref to put
- * on the content and its measured height (`null` until first measured). Used to
- * coordinate the generate-address animation: the "from" amount field grows by
- * exactly the height the removed "to" amount block gives up, so the card's total
- * height is unchanged.
- *
- * A hook rather than a wrapper component so call sites use inline JSX — a
- * `children: ReactNode` prop trips the repo's duplicated `@types/react`.
- */
-function useMeasuredHeight() {
-	const ref = useRef<HTMLDivElement>(null);
-	const [height, setHeight] = useState<number | null>(null);
-
-	useEffect(() => {
-		const el = ref.current;
-		if (!el) return;
-		const measure = () => setHeight(el.offsetHeight);
-		measure();
-		const ro = new ResizeObserver(measure);
-		ro.observe(el);
-		return () => ro.disconnect();
-	}, []);
-
-	return { ref, height };
-}
-
 export function SwapCard() {
 	const t = useTranslations();
 	// Default amount denomination, set in the menu and persisted. It seeds the
@@ -221,12 +70,7 @@ export function SwapCard() {
 	const [genAddress, setGenAddress] = useState(false);
 	// Generate-address mode swaps the "from" amount ($0 + units) for a receive
 	// view (QR + vertical address) and removes the "to" amount block entirely.
-	// Each area animates its measured height to fit whatever content it holds.
-	const fromAmountBox = useMeasuredHeight();
-	const toAmountBox = useMeasuredHeight();
-	const fromAmountHeight = fromAmountBox.height ?? undefined;
-	const toAmountHeight =
-		toAmountBox.height == null ? undefined : genAddress ? 0 : toAmountBox.height;
+	// SwapFrom / SwapTo each animate their own measured height to fit content.
 	const [submitting, setSubmitting] = useState(false);
 	const action = getActionLabel(fromToken, toToken);
 	const canFlip = fromToken !== null && toToken !== null;
@@ -493,67 +337,34 @@ export function SwapCard() {
 			transition={{ duration: 0.4, ease: "easeOut" }}
 		>
 			{/* You pay */}
-			<section className="rounded-3xl bg-card px-4 pb-3 pt-4">
-				<TokenBox
-					variant="from"
-					selected={fromToken}
-					onSelect={setFromToken}
-					onSetAmount={setFromAmount}
-					connected={connected}
-					walletAddress={address}
-					onConnect={connect}
-					onDisconnect={disconnect}
-					genAddress={genAddress}
-					onToggleGenAddress={() => {
-						const next = !genAddress;
-						setGenAddress(next);
-						// Deselecting generate-address while not connected: the address
-						// shown was only a placeholder, so revert the "from" field to its
-						// empty state instead of leaving a fake selected token.
-						if (!next && !connected) {
-							setFromToken(null);
-							setFromAmount("0");
-						}
-					}}
-					triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4 hover:bg-foreground/[0.03]"
-				/>
-				<div className="-mx-4 border-t-2 border-background" />
-				<div
-					className={cn("flex flex-col justify-center", AMOUNT_FIELD_TRANSITION)}
-					style={{ height: fromAmountHeight }}
-				>
-					<div ref={fromAmountBox.ref}>
-						{genAddress ? (
-							// Receive view: QR + vertical address, formatted per asset.
-							// The $0 + units are hidden in this mode. CryptoAddress's own
-							// p-2 matches the normal field's p-2, so the gap below it to the
-							// flip button is identical (no extra wrapper padding).
-							<CryptoAddress
-								address={receiveAddress}
-								qrValue={receivePayload}
-								arena={fromToken?.logo}
-							/>
-						) : (
-							<div className="flex flex-col items-center gap-2 p-2">
-								<AmountInput
-									value={fromAmount}
-									prefix={fromMode === "usd" ? "$" : undefined}
-								/>
-								<Pill onClick={toggleFromMode}>
-									<span className="opacity-50">=</span>{" "}
-									<ConversionValue
-										mode={fromMode}
-										usd={fromUsd}
-										units={fromUnits}
-										symbol={fromToken?.symbol ?? ""}
-									/>
-									<ArrowUpDown className="size-3.5" />
-								</Pill>
-							</div>
-						)}
-					</div>
-				</div>
-			</section>
+			<SwapFrom
+				token={fromToken}
+				onSelectToken={setFromToken}
+				amount={fromAmount}
+				onSetAmount={setFromAmount}
+				mode={fromMode}
+				onToggleMode={toggleFromMode}
+				usd={fromUsd}
+				units={fromUnits}
+				connected={connected}
+				walletAddress={address}
+				onConnect={connect}
+				onDisconnect={disconnect}
+				genAddress={genAddress}
+				onToggleGenAddress={() => {
+					const next = !genAddress;
+					setGenAddress(next);
+					// Deselecting generate-address while not connected: the address
+					// shown was only a placeholder, so revert the "from" field to its
+					// empty state instead of leaving a fake selected token.
+					if (!next && !connected) {
+						setFromToken(null);
+						setFromAmount("0");
+					}
+				}}
+				receiveAddress={receiveAddress}
+				receivePayload={receivePayload}
+			/>
 
 			{/* Swap direction */}
 			<div className="relative z-10 mx-auto -my-3 flex w-fit">
@@ -588,47 +399,20 @@ export function SwapCard() {
 			</div>
 
 			{/* You receive */}
-			<section className="rounded-3xl bg-card px-4 pb-0 pt-6">
-				<TokenBox
-					variant="to"
-					selected={toToken}
-					onSelect={setToToken}
-					walletAddress={address}
-					slippage={slippage}
-					fee={feeUsd}
-					feeLoading={quoteLoading}
-					onOpenSlippage={() => setSlippageOpen(true)}
-					triggerClassName={cn(
-						"-mx-4 -mt-6 w-[calc(100%+2rem)] px-4 pb-4 pt-6 hover:bg-foreground/[0.03]",
-						genAddress ? "rounded-3xl" : "rounded-t-3xl",
-					)}
-				/>
-				{/* The destination amount is removed entirely in generate-address
-				    mode; the "from" field grows by exactly this block's height so
-				    the card's total height never changes. */}
-				<div className={AMOUNT_FIELD_TRANSITION} style={{ height: toAmountHeight }}>
-					<div ref={toAmountBox.ref}>
-						<div className="-mx-4 border-t-2 border-background" />
-						<div className="flex flex-col items-center gap-2 p-2">
-							<AmountInput
-								value={trim(toMode === "token" ? toAmount : toUsd)}
-								prefix={toMode === "usd" ? "$" : undefined}
-								muted
-							/>
-							<Pill onClick={toggleToMode}>
-								<span className="opacity-50">=</span>{" "}
-								<ConversionValue
-									mode={toMode}
-									usd={toUsd}
-									units={toAmount}
-									symbol={toToken?.symbol ?? ""}
-								/>
-								<ArrowUpDown className="size-3.5" />
-							</Pill>
-						</div>
-					</div>
-				</div>
-			</section>
+			<SwapTo
+				token={toToken}
+				onSelectToken={setToToken}
+				walletAddress={address}
+				slippage={slippage}
+				fee={feeUsd}
+				feeLoading={quoteLoading}
+				onOpenSlippage={() => setSlippageOpen(true)}
+				amount={toAmount}
+				usd={toUsd}
+				mode={toMode}
+				onToggleMode={toggleToMode}
+				collapsed={genAddress}
+			/>
 
 			<MobileKeypad onKey={handleKey} />
 

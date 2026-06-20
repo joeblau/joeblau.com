@@ -1,0 +1,285 @@
+/**
+ * @joeblau/unified-ui — standalone style contract.
+ *
+ * Import once in your app (e.g. `import "@joeblau/unified-ui/styles.css"`). This
+ * file is self-contained: it defines every CSS custom property the components
+ * read (light + dark), the themed-border reset, and the component-local classes
+ * (.apple-edge-glow, .haptic-*, .scrollbar-subtle, .scroll-fade, .token-box-label).
+ *
+ * The semantic Tailwind utilities the components use (bg-card, text-foreground,
+ * border-background, the foreground/<opacity> overlays, etc.) still need the
+ * color scale mapped in YOUR Tailwind config — use ./tailwind-preset (v3) or the
+ * documented @theme block (v4). This file only supplies the raw token values +
+ * the non-utility CSS; it does not register the utilities themselves.
+ */
+
+:root {
+  /* Easings (only needed if you wire the optional theme-toggle view transition) */
+  --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --expo-in: cubic-bezier(0.7, 0, 0.84, 0);
+
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+
+  /* NOTE the deliberate asymmetry: --card (96%) is DARKER than --background
+     (100%) in light, and LIGHTER than --background (3.9%) in dark, so the card
+     lifts off the page in both themes. */
+  --card: 0 0% 96%;
+  --card-foreground: 0 0% 3.9%;
+
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --ring: 0 0% 3.9%;
+
+  /* Drives only rounded-lg/md/sm. The card geometry (rounded-3xl/2xl/full) uses
+     Tailwind defaults and is NOT derived from --radius. */
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 0 0% 3.9%;
+  --foreground: 0 0% 98%;
+
+  --muted: 0 0% 14.9%;
+  --muted-foreground: 0 0% 63.9%;
+
+  --popover: 0 0% 3.9%;
+  --popover-foreground: 0 0% 98%;
+
+  --card: 0 0% 7.5%;
+  --card-foreground: 0 0% 98%;
+
+  --border: 0 0% 14.9%;
+  --input: 0 0% 14.9%;
+
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 9%;
+
+  --secondary: 0 0% 14.9%;
+  --secondary-foreground: 0 0% 98%;
+
+  --accent: 0 0% 14.9%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --ring: 0 0% 83.1%;
+}
+
+/* The card relies on bare `border`/`border-t` utilities painting themed; mirror
+   the app's `* { @apply border-border }` reset. Scope to the card if you don't
+   want it global by wrapping in your own selector. */
+.unified-ui-root *,
+.unified-ui-root *::before,
+.unified-ui-root *::after {
+  border-color: hsl(var(--border));
+}
+
+/* Structural hook for the large From/To placeholder label. Font handling
+   (incl. CJK weight tweaks) is the consumer's responsibility — this class
+   carries no weight override. */
+.token-box-label {
+}
+
+/* Subtle, theme-aware scrollbar (shadcn-style). */
+.scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
+}
+.scrollbar-subtle::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-subtle::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: hsl(var(--muted-foreground) / 0.25);
+}
+.scrollbar-subtle::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* Project Fathom haptic overlay (iOS only). Rendered by HapticButton; the host
+   stays a normal button while an invisible <label> linked to a native
+   <input switch> fills it. Swipes pass through; only a completed tap toggles
+   the switch and fires the WebKit system haptic. */
+.haptic-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.haptic-label {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.haptic-switch {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+/* Apple-Intelligence edge glow. The element is painted with the animated
+   linear-gradient (set inline by AppleBorderGradient); here we round the outer
+   corners and feather the gradient inward to transparent. `--feather` (set by
+   the component's `intensity`) controls band thickness; this MUST ship or the
+   glow becomes a flat opaque rectangle. */
+.apple-edge-glow {
+  --feather: 32px;
+  border-radius: 26px;
+  -webkit-mask-image: linear-gradient(
+      to top,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to left,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to right,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    );
+  mask-image: linear-gradient(
+      to top,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to left,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    ),
+    linear-gradient(
+      to right,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 0.82) calc(var(--feather) * 0.18),
+      rgb(0 0 0 / 0.58) calc(var(--feather) * 0.36),
+      rgb(0 0 0 / 0.36) calc(var(--feather) * 0.55),
+      rgb(0 0 0 / 0.16) calc(var(--feather) * 0.75),
+      transparent var(--feather)
+    );
+}
+
+/* Skiper87-style scroll fade for scrollable lists (e.g. a token drawer). Pure
+   CSS via scroll-driven animation-timeline; degrades to no fade where
+   unsupported. */
+@property --ft {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@property --fb {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@keyframes scroll-fade-top {
+  0%,
+  6% {
+    --ft: 0%;
+  }
+  14%,
+  100% {
+    --ft: 8%;
+  }
+}
+@keyframes scroll-fade-bottom {
+  0%,
+  86% {
+    --fb: 8%;
+  }
+  94%,
+  100% {
+    --fb: 0%;
+  }
+}
+.scroll-fade {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--ft),
+    #000 calc(100% - var(--fb)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--ft),
+    #000 calc(100% - var(--fb)),
+    transparent 100%
+  );
+  animation-name: scroll-fade-top, scroll-fade-bottom;
+  animation-timeline: scroll(self), scroll(self);
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}

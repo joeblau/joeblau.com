@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import { Download, X } from "lucide-react";
 import type { SymbolRecord } from "@/lib/types";
 
 function TagRow({ label, tags, onTag }: { label: string; tags: string[]; onTag: (t: string) => void }) {
@@ -80,6 +80,14 @@ export function SymbolDetail({
 						<div className="text-center text-xs text-muted-foreground">
 							Vol {symbol.vol} · №{symbol.plate ?? symbol.num}
 						</div>
+						<a
+							href={symbol.svg}
+							download={`${symbol.id}.svg`}
+							className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:border-foreground/40 hover:bg-accent"
+						>
+							<Download className="h-4 w-4" />
+							Download SVG
+						</a>
 					</div>
 
 					<div className="flex flex-col gap-4">
