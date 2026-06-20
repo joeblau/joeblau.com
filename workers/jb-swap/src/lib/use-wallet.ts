@@ -74,17 +74,22 @@ export function useWallet() {
 			connectWallet();
 		},
 		// Real disconnect. Flip the local override first so the UI returns to the
-		// connect screen immediately and reliably. Then best-effort sever the
-		// underlying connection: injected EVM wallets ignore connector
-		// `disconnect()` and Privy's `useWallets()` isn't gated on auth, so we ask
-		// the provider to revoke the dApp's account permission (EIP-2255
-		// `wallet_revokePermissions`). MetaMask / Rabby honor this and actually
-		// drop the connection, so the next connect re-prompts for approval; wallets
-		// that don't support it stay hidden behind the override. Solana wallets
-		// (Phantom) support programmatic `disconnect()`. Only tear down a Privy
-		// session if one actually exists — with connector-only `connectWallet`
-		// there usually isn't one, and calling `logout()` with no authenticated
-		// user 400s ("Error destroying session").
+		// connect screen immediately and reliably. Then, for EVM, best-effort
+		// revoke the dApp's account permission (EIP-2255 `wallet_revokePermissions`):
+		// MetaMask / Rabby honor this and actually drop the connection so the next
+		// connect re-prompts; wallets that don't support it stay hidden behind the
+		// override.
+		//
+		// We deliberately DON'T call the Privy connector's `wallet.disconnect()`.
+		// For injected wallets (incl. Phantom on Solana, which has no programmatic
+		// disconnect at all) it's a no-op that only logs a `console.warn`:
+		// "Programmatic disconnect with <wallet> is not yet supported." The override
+		// is what actually returns the UI to the connect screen, and the EVM revoke
+		// above does the real connector teardown where it's supported.
+		//
+		// Only tear down a Privy session if one actually exists — with
+		// connector-only `connectWallet` there usually isn't one, and calling
+		// `logout()` with no authenticated user 400s ("Error destroying session").
 		disconnect: async () => {
 			setManualDisconnect();
 			if (evmWallet) {
@@ -99,8 +104,6 @@ export function useWallet() {
 					// keeps it hidden until the page is refreshed.
 				}
 			}
-			void evmWallet?.disconnect?.();
-			void solanaWallet?.disconnect?.();
 			if (authenticated) void logout().catch(() => {});
 		},
 		getAdaptedWallet,
