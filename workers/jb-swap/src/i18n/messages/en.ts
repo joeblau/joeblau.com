@@ -35,6 +35,8 @@ export const en = {
 	"tokenDrawer.action.scanQrAriaLabel": "Scan QR code",
 	"tokenDrawer.input.searchPlaceholder": "Search name or paste address",
 	"tokenDrawer.filter.all": "All",
+	"tokenDrawer.section.hot": "Hot",
+	"tokenDrawer.section.all": "All tokens",
 	"tokenDrawer.empty.noTokensFound": "No tokens found",
 	"tokenDrawer.row.selectedSuffix": " · selected",
 	"slippage.title": "Slippage",
