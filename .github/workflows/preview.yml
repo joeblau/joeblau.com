@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        worker: [jb-www, jb-travel, jb-gear, jb-swap, jb-symbols]
+        worker: [jb-www, jb-travel, jb-gear, jb-swap, jb-symbols, jb-dexos]
     steps:
       - uses: actions/checkout@v6
 
