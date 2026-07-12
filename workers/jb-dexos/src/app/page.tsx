@@ -3,8 +3,8 @@ import remarkGfm from "remark-gfm";
 import memo from "@/content/memo.md";
 
 const AUTHORS = [
-  { name: "Joe Blau", companies: "Uber / Amazon", role: "Design Engineer" },
-  { name: "David Blau", companies: "Jump / MIT", role: "Quant Engineer" },
+  { name: "Joe Blau", companies: "Uber • Amazon", role: "Design Engineer" },
+  { name: "David Blau", companies: "Jump • MIT", role: "Quant Engineer" },
 ];
 
 export default function Home() {
@@ -17,14 +17,14 @@ export default function Home() {
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{memo}</ReactMarkdown>
       </article>
 
-      <footer className="mt-16 grid grid-cols-2 gap-8 border-t border-border pt-8">
+      <footer className="mt-16 grid grid-cols-2 gap-8 border-t border-border pt-10">
         {AUTHORS.map((author) => (
           <div key={author.name}>
-            <p className="font-bold">{author.name}</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-2xl font-bold">{author.name}</p>
+            <p className="mt-2 text-lg text-muted-foreground">
               {author.companies}
             </p>
-            <p className="mt-3 text-sm font-semibold text-muted-foreground">
+            <p className="mt-4 text-lg font-semibold text-muted-foreground">
               {author.role}
             </p>
           </div>
