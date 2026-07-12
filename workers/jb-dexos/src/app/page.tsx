@@ -1,14 +1,6 @@
-import fs from "node:fs";
-import path from "node:path";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
-// Read the memo at build time — this page is statically prerendered, so the
-// file read happens during `next build`, never at runtime on the edge.
-const memo = fs.readFileSync(
-  path.join(process.cwd(), "src/content/memo.md"),
-  "utf8",
-);
+import memo from "@/content/memo.md";
 
 export default function Home() {
   return (
