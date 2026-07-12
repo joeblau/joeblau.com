@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import memo from "@/content/memo.md";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const AUTHORS = [
   {
@@ -14,9 +15,12 @@ const AUTHORS = [
 export default function Home() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-16 sm:py-24">
-      <p className="mb-3 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-        DEXos
-      </p>
+      <header className="mb-8 flex items-center justify-between gap-4">
+        <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          DEXos
+        </p>
+        <ThemeToggle />
+      </header>
       <article className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-extrabold prose-headings:tracking-tight prose-h1:text-balance">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{memo}</ReactMarkdown>
       </article>
