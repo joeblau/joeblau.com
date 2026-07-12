@@ -53,5 +53,6 @@ We are especially interested in speaking with:
 * **Circle** for native stablecoin settlement
 * **DoubleZero** for primary open-fiber networking
 * **Jump Trading** for liquidity provision
+* **Chainalysis** for compliance and on-chain analytics
 
 Early partners can help shape the foundation layer of 24/7 global markets and secure a leadership position as this infrastructure matures.
