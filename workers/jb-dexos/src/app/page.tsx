@@ -3,7 +3,11 @@ import remarkGfm from "remark-gfm";
 import memo from "@/content/memo.md";
 
 const AUTHORS = [
-  { name: "Joe Blau", companies: "Uber • Amazon", role: "Design Engineer" },
+  {
+    name: "Joe Blau",
+    companies: "Uber • Amazon • Virginia Tech",
+    role: "Design Engineer",
+  },
   { name: "David Blau", companies: "Jump • MIT", role: "Quant Engineer" },
 ];
 
@@ -21,12 +25,10 @@ export default function Home() {
         {AUTHORS.map((author) => (
           <div key={author.name}>
             <p className="text-2xl font-bold">{author.name}</p>
-            <p className="mt-2 text-lg text-muted-foreground">
-              {author.companies}
-            </p>
-            <p className="mt-4 text-lg font-semibold text-muted-foreground">
+            <p className="text-lg font-semibold text-muted-foreground">
               {author.role}
             </p>
+            <p className="text-lg text-muted-foreground">{author.companies}</p>
           </div>
         ))}
       </footer>
