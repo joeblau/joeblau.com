@@ -28,11 +28,11 @@ export default function Home() {
       <footer className="mt-16 grid grid-cols-2 gap-8 border-t border-border pt-10">
         {AUTHORS.map((author) => (
           <div key={author.name}>
-            <p className="text-2xl font-bold">{author.name}</p>
-            <p className="text-lg font-semibold text-muted-foreground">
+            <p className="text-xl font-bold">{author.name}</p>
+            <p className="text-base font-semibold text-muted-foreground">
               {author.role}
             </p>
-            <p className="text-lg text-muted-foreground">{author.companies}</p>
+            <p className="text-base text-muted-foreground">{author.companies}</p>
           </div>
         ))}
       </footer>
