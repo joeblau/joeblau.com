@@ -21,7 +21,7 @@ export default function Home() {
         </p>
         <ThemeToggle />
       </header>
-      <article className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-extrabold prose-headings:tracking-tight prose-h1:text-balance">
+      <article className="prose prose-stone max-w-none dark:prose-invert prose-headings:font-extrabold prose-headings:tracking-tight prose-h1:text-balance">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{memo}</ReactMarkdown>
       </article>
 
