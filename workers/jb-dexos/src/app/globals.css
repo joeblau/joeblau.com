@@ -98,9 +98,7 @@
   padding: 0.25rem 0;
 }
 
-/* Let wide markdown tables scroll rather than overflow the page. */
+/* Full-width tables; the wrapper (see page.tsx) handles overflow scroll. */
 .prose table {
-  display: block;
-  overflow-x: auto;
-  white-space: nowrap;
+  width: 100%;
 }
