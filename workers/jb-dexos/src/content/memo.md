@@ -97,6 +97,7 @@ We are looking for a small group of partners to build this infrastructure with u
 * world-class network connectivity
 * deep liquidity partnerships
 * native stablecoin integration
+* compliance-grade data logging and on-chain analytics output
 
 We are especially interested in speaking with:
 

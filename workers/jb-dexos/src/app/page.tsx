@@ -28,6 +28,13 @@ export default function Home() {
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex]}
+          components={{
+            table: ({ children, ...props }) => (
+              <div className="overflow-x-auto">
+                <table {...props}>{children}</table>
+              </div>
+            ),
+          }}
         >
           {memo}
         </ReactMarkdown>
