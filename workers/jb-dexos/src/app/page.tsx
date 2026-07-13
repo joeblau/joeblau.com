@@ -1,5 +1,8 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import memo from "@/content/memo.md";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -22,7 +25,12 @@ export default function Home() {
         <ThemeToggle />
       </header>
       <article className="prose prose-stone max-w-none dark:prose-invert prose-headings:font-extrabold prose-headings:tracking-tight prose-h1:text-balance">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{memo}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+        >
+          {memo}
+        </ReactMarkdown>
       </article>
 
       <footer className="mt-16 grid grid-cols-2 gap-8 border-t border-border pt-10">

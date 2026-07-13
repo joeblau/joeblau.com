@@ -28,6 +28,57 @@ We use a compact set of 16 high-performance nodes placed across major financial 
 
 The network uses a fixed validator set of 16 high-capacity nodes across key global geographies. Each node runs a purpose-built consensus protocol designed for low-latency trading. Leader election is geographically aware so the active leader is positioned to minimize latency for most traffic.
 
+Throughput comes from a tightly engineered execution and networking stack:
+
+* **SIMD execution** — vectorized instruction processing so each core validates and applies many transactions in parallel rather than one at a time.
+* **Slab allocation** — pre-sized memory slabs keep account and order-book state cache-resident and eliminate per-transaction allocation overhead.
+* **Compression** — aggressive on-the-wire and at-rest compression that keeps bandwidth and storage in check as volume scales.
+* **Minimmit consensus** — a minimal-round-trip finality path that commits blocks in as few communication steps as possible across the 16-node set.
+
+These run over **100 Gbps+ networking** between validators, so a small, elite node set can move enormous transaction volume at the low latencies co-located exchanges expect.
+
+**The throughput math.** Let $C_{line}$ be the link capacity in bytes/s, $P$ the compressible order payload, $r$ the LZ4 compression ratio, $O$ the per-batch overhead (aggregated consensus + framing), and $B$ the orders per batch. The effective per-order wire cost and the resulting order-throughput ceiling on a single link are:
+
+$$
+W(B, r) = P\,r + \frac{O}{B}
+\qquad
+T \le \frac{C_{line}}{W(B, r)} = \frac{C_{line}}{P\,r + O/B}
+$$
+
+Over a DoubleZero **100 Gbit/s** link ($C_{line} = 12.5$ GB/s) with $P = 64$ B, $O = 145$ B, and a batch of $B = 64$ at raw LZ4 ($r = 1$), the effective cost is $W = 66.27$ B/order:
+
+| Calculation | Result |
+| --- | ---: |
+| DoubleZero link | 100 Gbit/s |
+| Byte capacity | 12.5 GB/s |
+| DexOS raw wire cost | 66.27 B/order |
+| Theoretical order-only capacity | 188.6M orders/s |
+
+That is a single 100 Gbit/s link; larger batches and LZ4 push the order-only ceiling higher still:
+
+| Batch $B$ | LZ4 ratio | Wire B/msg | 100 Gbit/s ceiling |
+| ---: | ---: | ---: | ---: |
+| 32 | 1.00 (raw) | 68.53 | 182.4M msg/s |
+| 32 | 0.90 | 62.13 | 201.2M msg/s |
+| 32 | 0.75 | 52.53 | 238.0M msg/s |
+| 32 | 0.50 | 36.53 | 342.2M msg/s |
+| 64 | 1.00 (raw) | 66.27 | 188.6M msg/s |
+| 64 | 0.90 | 59.87 | 208.8M msg/s |
+| 64 | 0.75 | 50.27 | 248.7M msg/s |
+| 64 | 0.50 | 34.27 | 364.8M msg/s |
+| 128 | 1.00 (raw) | 65.13 | 191.9M msg/s |
+| 128 | 0.90 | 58.73 | 212.8M msg/s |
+| 128 | 0.75 | 49.13 | 254.4M msg/s |
+| 128 | 0.50 | 33.13 | 377.3M msg/s |
+
+As $B$ grows the per-order overhead $O/B$ vanishes, so the asymptotic order-only ceiling is set by payload alone:
+
+$$
+T_{\max} = \lim_{B \to \infty} \frac{C_{line}}{P\,r + O/B} = \frac{C_{line}}{P\,r}
+$$
+
+At raw LZ4 ($r = 1$) that is $12.5\text{ GB/s} / 64\text{ B} \approx 195.3\text{M orders/s}$ per link, rising to $\approx 390\text{M}$ at $r = 0.5$ — throughput is never the binding constraint.
+
 Built as a trading operating system, the protocol is intended to support spot, perpetuals, options, and additional market structures through native composability.
 
 ## Why This Wins

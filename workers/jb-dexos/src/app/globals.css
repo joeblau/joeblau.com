@@ -90,3 +90,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Let wide KaTeX display formulas scroll inside the reading column. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
+/* Let wide markdown tables scroll rather than overflow the page. */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
