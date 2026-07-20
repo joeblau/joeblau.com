@@ -301,6 +301,7 @@ export function SwapCard({
 				amount={fromAmount}
 				mode={fromMode}
 				onToggleMode={onToggleFromMode}
+				onActivatePicker={fromApi.onActivate}
 				usd={fromUsd}
 				units={fromUnits}
 				symbol={fromToken?.symbol}
@@ -352,6 +353,7 @@ export function SwapCard({
 				usd={toUsd}
 				mode={toMode}
 				onToggleMode={onToggleToMode}
+				onActivatePicker={toApi.onActivate}
 				symbol={toToken?.symbol}
 				amountAriaLabel={labels?.amountAriaLabel}
 				collapsed={genAddress}

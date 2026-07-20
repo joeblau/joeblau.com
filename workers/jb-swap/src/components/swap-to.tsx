@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpDown } from "lucide-react";
+import { useState } from "react";
 
 import { HapticButton } from "@/components/haptic-button";
 import {
@@ -60,6 +61,9 @@ export function SwapTo({
 }: SwapToProps) {
 	const box = useMeasuredHeight();
 	const height = box.height == null ? undefined : collapsed ? 0 : box.height;
+	// Lifted out of TokenBox so the amount area below it can open the same
+	// picker — the whole card is one target for that.
+	const [pickerOpen, setPickerOpen] = useState(false);
 
 	return (
 		<section className="group relative rounded-3xl bg-card px-4 pb-0 pt-6">
@@ -78,6 +82,8 @@ export function SwapTo({
 				fee={fee}
 				feeLoading={feeLoading}
 				onOpenSlippage={onOpenSlippage}
+				open={pickerOpen}
+				onOpenChange={setPickerOpen}
 				triggerClassName={cn(
 					"-mx-4 -mt-6 w-[calc(100%+2rem)] px-4 pb-4 pt-6",
 					collapsed ? "rounded-3xl" : "rounded-t-3xl",
@@ -89,13 +95,15 @@ export function SwapTo({
 			<div className={AMOUNT_FIELD_TRANSITION} style={{ height }}>
 				<div ref={box.ref}>
 					<div className="relative">
-						{/* Full-area tap target behind a pass-through content layer:
-						    tapping anywhere on the amount flips the denomination. The
-						    Pill stays the accessible control, so this is a11y-hidden. */}
+						{/* Full-area tap target behind a pass-through content layer.
+						    The card reads as one surface, so tapping the amount opens
+						    the token picker exactly like tapping the trigger above it —
+						    only the Pill switches denomination. The trigger is the
+						    accessible control for this, so the overlay is a11y-hidden. */}
 						<div className="absolute inset-0">
 							<HapticButton
 								type="button"
-								onClick={onToggleMode}
+								onClick={() => setPickerOpen(true)}
 								tabIndex={-1}
 								aria-hidden
 								wrapperClassName="grid size-full"

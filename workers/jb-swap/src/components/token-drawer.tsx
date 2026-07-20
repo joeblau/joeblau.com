@@ -3,7 +3,7 @@
 import Avatar from "boring-avatars";
 import { AnimatePresence, motion } from "framer-motion";
 import { Flame, FlaskConical, Lock, LogOut, Scan, Search, SlidersHorizontal, X } from "lucide-react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Drawer } from "vaul";
 
 import { HapticButton } from "@/components/haptic-button";
@@ -302,6 +302,8 @@ export function TokenBox({
 	onDisconnect,
 	genAddress,
 	onToggleGenAddress,
+	open: openProp,
+	onOpenChange,
 }: {
 	variant: Variant;
 	/** Controlled selected token (owned by the parent so the flip can swap them). */
@@ -322,6 +324,12 @@ export function TokenBox({
 	onDisconnect?: () => void;
 	genAddress?: boolean;
 	onToggleGenAddress?: () => void;
+	/**
+	 * Controlled open state. Omit to let the drawer own it. SwapFrom/SwapTo pass
+	 * it so the amount area below the trigger can open the same picker.
+	 */
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 }) {
 	const t = useTranslations();
 	// Real-time volume-proxy ranking. From = "withdraw" (source side), To =
@@ -329,7 +337,20 @@ export function TokenBox({
 	// identically until a real directional bridge-flow feed exists.
 	const { data: volumeData, sortTokens, sortChains } = useVolumeRanking();
 	const direction = variant === "from" ? "withdraw" : "deposit";
-	const [open, setOpen] = useState(false);
+	// Optionally controlled. `setOpen` is identity-stable and reads its inputs
+	// through refs, so the Cmd+F/Cmd+K effect below (which intentionally does not
+	// re-subscribe on every render) can't capture a stale closure.
+	const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+	const isControlled = openProp !== undefined;
+	const open = isControlled ? openProp : uncontrolledOpen;
+	const controlledRef = useRef(isControlled);
+	controlledRef.current = isControlled;
+	const onOpenChangeRef = useRef(onOpenChange);
+	onOpenChangeRef.current = onOpenChange;
+	const setOpen = useCallback((next: boolean) => {
+		if (!controlledRef.current) setUncontrolledOpen(next);
+		onOpenChangeRef.current?.(next);
+	}, []);
 	const [query, setQuery] = useState("");
 	const [activeChainId, setActiveChainId] = useState<number | null>(null);
 	// "From" lists only the assets the connected wallet holds (multicall
