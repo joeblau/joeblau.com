@@ -60,8 +60,22 @@ export interface RelayChainOption {
 	icon: string;
 }
 
-/** Popular chains surfaced first in the filter row; the rest follow by id. */
-const CHAIN_PRIORITY = [1, 8453, 42161, 10, 137, 792703809, 56, 43114, 130];
+/**
+ * Chains pinned to the head of the filter row, in this order. These lead
+ * regardless of measured volume — see {@link pinPriorityChains}.
+ */
+const CHAIN_PRIORITY = [
+	1, // Ethereum
+	8453, // Base
+	42161, // Arbitrum
+	10, // Optimism
+	4663, // Robinhood Chain
+	137, // Polygon
+	792703809, // Solana
+	56, // BNB
+	43114, // Avalanche
+	130, // Unichain
+];
 
 /** Every chain present in the token list, for the drawer's chain filter chips. */
 export const relayChains: RelayChainOption[] = (() => {
@@ -75,12 +89,27 @@ export const relayChains: RelayChainOption[] = (() => {
 			});
 		}
 	}
-	return Array.from(seen.values()).sort((a, b) => {
-		const ra = CHAIN_PRIORITY.indexOf(a.chainId);
-		const rb = CHAIN_PRIORITY.indexOf(b.chainId);
-		if (ra !== -1 || rb !== -1) {
-			return (ra === -1 ? Infinity : ra) - (rb === -1 ? Infinity : rb);
-		}
-		return a.chainId - b.chainId;
-	});
+	return Array.from(seen.values()).sort((a, b) => a.chainId - b.chainId);
 })();
+
+/**
+ * Lift {@link CHAIN_PRIORITY} chains to the front, preserving the incoming
+ * order for everything else.
+ *
+ * This is applied *after* the volume sort, not before: volume ranking would
+ * otherwise bury a pinned chain the moment `/api/volume` resolves, so a chain
+ * pinned pre-hydration would visibly jump to the back a second after mount.
+ * Pinned chains absent from `chains` are skipped. Returns a new array.
+ */
+export function pinPriorityChains(
+	chains: RelayChainOption[],
+): RelayChainOption[] {
+	const byId = new Map(chains.map((c) => [c.chainId, c]));
+	const pinned: RelayChainOption[] = [];
+	for (const id of CHAIN_PRIORITY) {
+		const hit = byId.get(id);
+		if (hit) pinned.push(hit);
+	}
+	const pinnedIds = new Set(pinned.map((c) => c.chainId));
+	return [...pinned, ...chains.filter((c) => !pinnedIds.has(c.chainId))];
+}

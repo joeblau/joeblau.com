@@ -11,7 +11,11 @@ import { QrScanner } from "@/components/qr-scanner";
 import { TokenAmount } from "@/components/token-amount";
 import { ConnectWalletControl } from "@/components/wallet-connect";
 import { useTranslations } from "@/i18n/locale-provider";
-import { relayChains, relayTokens } from "@/lib/relay/token-list";
+import {
+	pinPriorityChains,
+	relayChains,
+	relayTokens,
+} from "@/lib/relay/token-list";
 import { useHeldTokens } from "@/lib/use-held-tokens";
 import { useVolumeRanking } from "@/lib/use-volume-ranking";
 import { cn } from "@/lib/utils";
@@ -413,9 +417,11 @@ export function TokenBox({
 	// sectioning, this is just the ranked list.
 	const displayList = hot.length > 0 ? [...hot, ...rest] : ranked;
 
-	// Chain filter chips, reordered by aggregate proxy volume (copy, no mutation
-	// of the shared relayChains const).
-	const sortedChains = sortChains(relayChains, direction);
+	// Chain filter chips: ranked by aggregate proxy volume, then the pinned
+	// chains lifted back to the front (copy, no mutation of the shared
+	// relayChains const). Pin last so volume ranking can't bury a pinned chain
+	// once /api/volume resolves.
+	const sortedChains = pinPriorityChains(sortChains(relayChains, direction));
 
 	const filteredRef = useRef(displayList);
 	filteredRef.current = displayList;
