@@ -22,6 +22,12 @@ export interface SwapFromProps {
 	amount: string;
 	mode: Mode;
 	onToggleMode: () => void;
+	/**
+	 * Open the token picker. The amount area is a tap target for this, so the
+	 * whole card behaves as one — matching `picker`'s own trigger. Omit to make
+	 * the amount area inert.
+	 */
+	onActivatePicker?: () => void;
 	/** USD value of the entered amount (for the conversion pill). */
 	usd: number;
 	/** Token units of the entered amount (for the conversion pill). */
@@ -48,6 +54,7 @@ export function SwapFrom({
 	amount,
 	mode,
 	onToggleMode,
+	onActivatePicker,
 	usd,
 	units,
 	symbol,
@@ -87,13 +94,15 @@ export function SwapFrom({
 						/>
 					) : (
 						<div className="relative">
-							{/* Full-area tap target behind a pass-through content layer:
-							    tapping anywhere on the amount flips the denomination. The
-							    Pill stays the accessible control, so this is a11y-hidden. */}
+							{/* Full-area tap target behind a pass-through content layer.
+							    The card reads as one surface, so tapping the amount opens
+							    the token picker exactly like tapping the trigger above it —
+							    only the Pill switches denomination. The picker's own
+							    trigger is the accessible control, so this is a11y-hidden. */}
 							<div className="absolute inset-0">
 								<HapticButton
 									type="button"
-									onClick={onToggleMode}
+									onClick={onActivatePicker}
 									tabIndex={-1}
 									aria-hidden
 									wrapperClassName="grid size-full"

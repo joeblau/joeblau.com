@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpDown } from "lucide-react";
+import { useState } from "react";
 
 import { CryptoAddress } from "@/components/crypto-address";
 import { HapticButton } from "@/components/haptic-button";
@@ -68,6 +69,9 @@ export function SwapFrom({
 }: SwapFromProps) {
 	const box = useMeasuredHeight();
 	const height = box.height ?? undefined;
+	// Lifted out of TokenBox so the amount area below it can open the same
+	// picker — the whole card is one target for that.
+	const [pickerOpen, setPickerOpen] = useState(false);
 
 	return (
 		<section className="group relative rounded-3xl bg-card px-4 pb-3 pt-4">
@@ -88,6 +92,8 @@ export function SwapFrom({
 				onDisconnect={onDisconnect}
 				genAddress={genAddress}
 				onToggleGenAddress={onToggleGenAddress}
+				open={pickerOpen}
+				onOpenChange={setPickerOpen}
 				triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4"
 			/>
 			<div
@@ -107,13 +113,15 @@ export function SwapFrom({
 						/>
 					) : (
 						<div className="relative">
-							{/* Full-area tap target behind a pass-through content layer:
-							    tapping anywhere on the amount flips the denomination. The
-							    Pill stays the accessible control, so this is a11y-hidden. */}
+							{/* Full-area tap target behind a pass-through content layer.
+							    The card reads as one surface, so tapping the amount opens
+							    the token picker exactly like tapping the trigger above it —
+							    only the Pill switches denomination. The trigger is the
+							    accessible control for this, so the overlay is a11y-hidden. */}
 							<div className="absolute inset-0">
 								<HapticButton
 									type="button"
-									onClick={onToggleMode}
+									onClick={() => setPickerOpen(true)}
 									tabIndex={-1}
 									aria-hidden
 									wrapperClassName="grid size-full"
@@ -125,6 +133,8 @@ export function SwapFrom({
 									value={amount}
 									prefix={mode === "usd" ? "$" : undefined}
 								/>
+								{/* Pill re-enables pointer events internally, so it acts on its
+								    own rather than falling through to the overlay behind it. */}
 								<Pill onClick={onToggleMode}>
 									<span className="opacity-50">=</span>{" "}
 									<ConversionValue
