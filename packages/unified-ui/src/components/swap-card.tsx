@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowUpDown } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
+import { price } from "../lib/format";
 import { cn } from "../lib/utils";
 import type {
 	GenerateAddressConfig,
@@ -19,7 +20,11 @@ import { AppleBorderGradient } from "./apple-border-gradient";
 import { AppMenuShell } from "./app-menu-shell";
 import { HapticButton } from "./haptic-button";
 import { MobileKeypad } from "./keypad";
-import { applyAmountKey, sanitizePastedAmount } from "./swap-field";
+import {
+	applyAmountKey,
+	sanitizePastedAmount,
+	unitsToMode,
+} from "./swap-field";
 import { SwapFrom } from "./swap-from";
 import { SwapTo } from "./swap-to";
 import { TokenTrigger } from "./token-trigger";
@@ -159,6 +164,13 @@ export function SwapCard({
 		genAddress ? "rounded-3xl" : "rounded-t-3xl",
 	);
 
+	// Max / Test report holdings in token units; fromAmount is denominated by
+	// fromMode, so convert before handing it up.
+	const setAmountFromUnits = (units: string) =>
+		onFromAmountChange(
+			unitsToMode(units, fromMode, fromToken ? price(fromToken) : 0),
+		);
+
 	// ── Token picker slots ────────────────────────────────────────────────────
 	const fromApi: PickerSlotApi = {
 		variant: "from",
@@ -170,7 +182,7 @@ export function SwapCard({
 		onActivate: () => setFromOpen(true),
 		walletAddress,
 		generateAddress: canGenerateAddress ? generateAddress : undefined,
-		onSetAmount: onFromAmountChange,
+		onSetAmount: setAmountFromUnits,
 		labels: triggerLabels?.from ?? {},
 	};
 	const toApi: PickerSlotApi = {
@@ -198,7 +210,7 @@ export function SwapCard({
 			triggerClassName={FROM_TRIGGER_CLASS}
 			walletAddress={walletAddress}
 			onActivate={fromApi.onActivate}
-			onSetAmount={onFromAmountChange}
+			onSetAmount={setAmountFromUnits}
 			labels={triggerLabels?.from}
 		/>
 	);

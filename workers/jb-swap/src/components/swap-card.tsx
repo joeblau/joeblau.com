@@ -14,6 +14,7 @@ import {
 	sanitizeAmount,
 	trim,
 	trimUsd,
+	unitsToMode,
 } from "@/components/swap-field";
 import { SwapFrom } from "@/components/swap-from";
 import { SwapTo } from "@/components/swap-to";
@@ -170,6 +171,11 @@ export function SwapCard() {
 	};
 	const toggleToMode = () =>
 		setToMode((m) => (m === "token" ? "usd" : "token"));
+
+	// Max / Test report holdings in token units; fromAmount is denominated by
+	// fromMode, so convert before storing.
+	const setAmountFromUnits = (units: string) =>
+		setFromAmount(unitsToMode(units, fromMode, fromPrice));
 
 	// Changing the default denomination in the menu switches BOTH inputs at once.
 	// Convert the editable FROM amount so its displayed value stays equivalent.
@@ -341,7 +347,7 @@ export function SwapCard() {
 				token={fromToken}
 				onSelectToken={setFromToken}
 				amount={fromAmount}
-				onSetAmount={setFromAmount}
+				onSetAmount={setAmountFromUnits}
 				mode={fromMode}
 				onToggleMode={toggleFromMode}
 				usd={fromUsd}

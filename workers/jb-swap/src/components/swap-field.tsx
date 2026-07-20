@@ -17,6 +17,26 @@ export function trimUsd(n: number) {
 	return String(Number(n.toFixed(2)));
 }
 
+/**
+ * Convert a raw *token unit* string into whatever denomination `mode` is
+ * showing, for the Max / Test shortcuts.
+ *
+ * Those shortcuts report holdings in token units, but the editable amount is
+ * denominated by the active mode — storing units verbatim while in USD mode
+ * makes them read as dollars (a 0.004220 ETH balance renders as "$0.00").
+ *
+ * Floors to the cent instead of rounding: Max must never resolve back to more
+ * units than the wallet holds, and `toFixed(2)` rounds half-up, which would
+ * push it just past the balance. Sub-cent holdings therefore floor to "0" —
+ * USD mode only has two decimals to work with. Returns "0" if the price is
+ * unknown, since there is no honest dollar figure to show.
+ */
+export function unitsToMode(units: string, mode: "token" | "usd", price: number) {
+	if (mode !== "usd") return units;
+	if (!(price > 0)) return "0";
+	return String(Math.floor((Number(units) || 0) * price * 100) / 100);
+}
+
 /** Keep only digits and a single decimal point; strip leading zeros. */
 export function sanitizeAmount(raw: string) {
 	let v = raw.replace(/[^0-9.]/g, "");
