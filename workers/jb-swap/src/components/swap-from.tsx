@@ -3,6 +3,7 @@
 import { ArrowUpDown } from "lucide-react";
 
 import { CryptoAddress } from "@/components/crypto-address";
+import { HapticButton } from "@/components/haptic-button";
 import {
 	AMOUNT_FIELD_TRANSITION,
 	AmountInput,
@@ -69,7 +70,13 @@ export function SwapFrom({
 	const height = box.height ?? undefined;
 
 	return (
-		<section className="rounded-3xl bg-card px-4 pb-3 pt-4">
+		<section className="group relative rounded-3xl bg-card px-4 pb-3 pt-4">
+			{/* Whole-card hover tint: the top picker and bottom amount are separate
+			    controls, but the seamless card highlights as one unit. */}
+			<div
+				aria-hidden
+				className="pointer-events-none absolute inset-0 rounded-3xl transition-colors group-hover:bg-foreground/[0.03]"
+			/>
 			<TokenBox
 				variant="from"
 				selected={token}
@@ -81,9 +88,8 @@ export function SwapFrom({
 				onDisconnect={onDisconnect}
 				genAddress={genAddress}
 				onToggleGenAddress={onToggleGenAddress}
-				triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4 hover:bg-foreground/[0.03]"
+				triggerClassName="-mx-4 -mt-4 w-[calc(100%+2rem)] rounded-t-3xl px-4 pb-4 pt-4"
 			/>
-			<div className="-mx-4 border-t-2 border-background" />
 			<div
 				className={cn("flex flex-col justify-center", AMOUNT_FIELD_TRANSITION)}
 				style={{ height }}
@@ -100,21 +106,36 @@ export function SwapFrom({
 							arena={token?.logo}
 						/>
 					) : (
-						<div className="flex flex-col items-center gap-2 p-2">
-							<AmountInput
-								value={amount}
-								prefix={mode === "usd" ? "$" : undefined}
-							/>
-							<Pill onClick={onToggleMode}>
-								<span className="opacity-50">=</span>{" "}
-								<ConversionValue
-									mode={mode}
-									usd={usd}
-									units={units}
-									symbol={token?.symbol ?? ""}
+						<div className="relative">
+							{/* Full-area tap target behind a pass-through content layer:
+							    tapping anywhere on the amount flips the denomination. The
+							    Pill stays the accessible control, so this is a11y-hidden. */}
+							<div className="absolute inset-0">
+								<HapticButton
+									type="button"
+									onClick={onToggleMode}
+									tabIndex={-1}
+									aria-hidden
+									wrapperClassName="grid size-full"
+									className="size-full cursor-pointer"
 								/>
-								<ArrowUpDown className="size-3.5" />
-							</Pill>
+							</div>
+							<div className="pointer-events-none relative flex flex-col items-center gap-2 p-2">
+								<AmountInput
+									value={amount}
+									prefix={mode === "usd" ? "$" : undefined}
+								/>
+								<Pill onClick={onToggleMode}>
+									<span className="opacity-50">=</span>{" "}
+									<ConversionValue
+										mode={mode}
+										usd={usd}
+										units={units}
+										symbol={token?.symbol ?? ""}
+									/>
+									<ArrowUpDown className="size-3.5" />
+								</Pill>
+							</div>
 						</div>
 					)}
 				</div>
