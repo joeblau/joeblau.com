@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	pinPriorityChains,
 	RELAY_TOKEN_LIST,
+	relayChains,
 	relayTokens,
 	toTokenRow,
 	type UniswapToken,
@@ -70,5 +72,45 @@ describe("relay token list", () => {
 	test("relayTokens derives 1:1 from the list with zeroed holdings", () => {
 		expect(relayTokens.length).toBe(RELAY_TOKEN_LIST.tokens.length);
 		expect(relayTokens.every((r) => r.amount === "0" && r.usd === "$0")).toBe(true);
+	});
+
+	test("Robinhood Chain is present in the generated list", () => {
+		const robinhood = relayChains.find((c) => c.chainId === 4663);
+		expect(robinhood?.name).toBe("Robinhood Chain");
+	});
+});
+
+describe("pinPriorityChains", () => {
+	const opt = (chainId: number) => ({ chainId, name: `c${chainId}`, icon: "" });
+
+	test("lifts pinned chains to the front in CHAIN_PRIORITY order", () => {
+		// Deliberately reversed: pinned chains must be reordered, not just moved.
+		const out = pinPriorityChains([opt(999), opt(4663), opt(8453), opt(1)]);
+		expect(out.map((c) => c.chainId)).toEqual([1, 8453, 4663, 999]);
+	});
+
+	test("preserves the incoming order of unpinned chains", () => {
+		const out = pinPriorityChains([opt(777), opt(999), opt(888), opt(1)]);
+		expect(out.map((c) => c.chainId)).toEqual([1, 777, 999, 888]);
+	});
+
+	test("skips pinned chains absent from the input", () => {
+		const out = pinPriorityChains([opt(8453), opt(999)]);
+		expect(out.map((c) => c.chainId)).toEqual([8453, 999]);
+	});
+
+	test("survives a volume sort that would otherwise bury a pinned chain", () => {
+		// Simulates post-hydration ranking: Robinhood dead last by volume.
+		const ranked = [opt(999), opt(888), opt(1), opt(4663)];
+		expect(pinPriorityChains(ranked).map((c) => c.chainId)).toEqual([
+			1, 4663, 999, 888,
+		]);
+	});
+
+	test("returns a new array and does not mutate the input", () => {
+		const input = [opt(999), opt(1)];
+		const out = pinPriorityChains(input);
+		expect(out).not.toBe(input);
+		expect(input.map((c) => c.chainId)).toEqual([999, 1]);
 	});
 });
