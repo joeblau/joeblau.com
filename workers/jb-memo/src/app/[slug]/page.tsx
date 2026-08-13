@@ -8,6 +8,33 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { MEMOS, getMemo } from "@/lib/memos";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { FlowSpec } from "@/components/flow-diagram";
+import { LazyFlowDiagram } from "@/components/flow-diagram-lazy";
+
+/**
+ * Pulls the JSON out of a ```flow fenced block. react-markdown hands `pre` the
+ * `code` element it wraps, so the spec has to be read back off that child.
+ * Returns null for every other fenced block, which then renders as normal code.
+ */
+function readFlowSpec(children: React.ReactNode): FlowSpec | null {
+  const code = Array.isArray(children) ? children[0] : children;
+  if (!code || typeof code !== "object" || !("props" in code)) return null;
+
+  const { className, children: source } = (
+    code as { props: { className?: string; children?: unknown } }
+  ).props;
+  if (!className?.includes("language-flow") || typeof source !== "string") {
+    return null;
+  }
+
+  try {
+    return JSON.parse(source) as FlowSpec;
+  } catch {
+    // A malformed spec should not take the whole memo down — fall back to
+    // rendering it as the code block it literally is.
+    return null;
+  }
+}
 
 export function generateStaticParams() {
   return MEMOS.map((memo) => ({ slug: memo.slug }));
@@ -81,6 +108,12 @@ export default async function MemoPage({
                 <table {...props}>{children}</table>
               </div>
             ),
+            // A ```flow block is a diagram spec, not a code sample.
+            pre: ({ children, ...props }) => {
+              const spec = readFlowSpec(children);
+              if (spec) return <LazyFlowDiagram spec={spec} />;
+              return <pre {...props}>{children}</pre>;
+            },
           }}
         >
           {memo.content}

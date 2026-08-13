@@ -1,4 +1,5 @@
 import dexos from "@/content/dexos.md";
+import validator from "@/content/validator.md";
 
 export type Author = {
   name: string;
@@ -40,6 +41,31 @@ export const MEMOS: Memo[] = [
         { value: "188.6M", label: "orders/s per link" },
         { value: "16", label: "global validators" },
         { value: "24/7", label: "continuous markets" },
+      ],
+    },
+    authors: [
+      {
+        name: "Joe Blau",
+        companies: "Uber • Amazon • Virginia Tech",
+        role: "Design Engineer",
+      },
+      { name: "David Blau", companies: "Jump • MIT", role: "Quant Engineer" },
+    ],
+  },
+  {
+    slug: "validator",
+    eyebrow: "Validator",
+    title: "Hyperliquid Full Validator — Strategy Overview",
+    description:
+      "Latency-optimized execution on HIP-3 markets: order-to-fill cut from ~5,000 ms to ~500 ms, with a materially cheaper fee stack.",
+    content: validator,
+    og: {
+      headline: "Hyperliquid Full Validator",
+      subhead: "Latency-optimized execution on HIP-3 markets",
+      stats: [
+        { value: "~500ms", label: "order-to-fill latency" },
+        { value: "47%", label: "lower taker fees" },
+        { value: "2–4wk", label: "initial test window" },
       ],
     },
     authors: [
