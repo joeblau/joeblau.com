@@ -1,9 +1,21 @@
 import { ImageResponse } from "next/og";
+import { MEMOS, getMemo } from "@/lib/memos";
 
 export const runtime = "nodejs";
 
-// Dynamic Open Graph image for DEXos — https://vercel.com/docs/og-image-generation
-export async function GET() {
+export function generateStaticParams() {
+  return MEMOS.map((memo) => ({ slug: memo.slug }));
+}
+
+// Dynamic Open Graph image per memo — https://vercel.com/docs/og-image-generation
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ slug: string }> },
+) {
+  const { slug } = await params;
+  const memo = getMemo(slug);
+  if (!memo) return new Response("Not found", { status: 404 });
+
   return new ImageResponse(
     (
       <div
@@ -28,7 +40,7 @@ export async function GET() {
             color: "#b8ad99",
           }}
         >
-          DEXos
+          {memo.eyebrow}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div
@@ -39,25 +51,22 @@ export async function GET() {
               letterSpacing: "-0.02em",
             }}
           >
-            A 24/7 Global Trading Operating System
+            {memo.og.headline}
           </div>
           <div style={{ fontSize: 34, color: "#b8ad99", fontWeight: 600 }}>
-            The next evolution in capital-market infrastructure
+            {memo.og.subhead}
           </div>
         </div>
         <div style={{ display: "flex", gap: 48, fontSize: 28 }}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontWeight: 800, fontSize: 40 }}>188.6M</span>
-            <span style={{ color: "#b8ad99" }}>orders/s per link</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontWeight: 800, fontSize: 40 }}>16</span>
-            <span style={{ color: "#b8ad99" }}>global validators</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontWeight: 800, fontSize: 40 }}>24/7</span>
-            <span style={{ color: "#b8ad99" }}>continuous markets</span>
-          </div>
+          {memo.og.stats.map((stat) => (
+            <div
+              key={stat.label}
+              style={{ display: "flex", flexDirection: "column" }}
+            >
+              <span style={{ fontWeight: 800, fontSize: 40 }}>{stat.value}</span>
+              <span style={{ color: "#b8ad99" }}>{stat.label}</span>
+            </div>
+          ))}
         </div>
       </div>
     ),

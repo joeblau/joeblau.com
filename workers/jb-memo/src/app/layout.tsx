@@ -9,27 +9,27 @@ const nunito = Nunito({
   display: "swap",
 });
 
-const title = "DEXos — A 24/7 Global Trading Operating System";
-const description =
-  "The next evolution of capital markets: a truly 24/7, globally decentralized, high-performance trading operating system.";
+const title = "Memo — Joe Blau";
+const description = "Memos on markets, infrastructure, and the systems behind them.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dexos.joeblau.com"),
-  title,
+  metadataBase: new URL("https://memo.joeblau.com"),
+  title: {
+    default: title,
+    template: "%s",
+  },
   description,
   openGraph: {
     title,
     description,
-    url: "https://dexos.joeblau.com",
-    siteName: "DEXos",
+    url: "https://memo.joeblau.com",
+    siteName: "Memo",
     type: "website",
-    images: [{ url: "/api/og", width: 1200, height: 630, alt: "DEXos" }],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/api/og"],
   },
 };
 
