@@ -5,7 +5,7 @@ declare namespace Cloudflare {
 	interface Env {
 		IMAGES: ImagesBinding;
 		ASSETS: Fetcher;
-		WORKER_SELF_REFERENCE: Fetcher /* jb-dexos */;
+		WORKER_SELF_REFERENCE: Fetcher /* jb-memo */;
 	}
 }
 interface CloudflareEnv extends Cloudflare.Env {}
