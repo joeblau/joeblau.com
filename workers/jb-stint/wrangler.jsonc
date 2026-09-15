@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jb-f1",
+  "main": ".open-next/worker.js",
+  "account_id": "2b04333c55d653550f69d1c732b92d98",
+  "compatibility_date": "2026-09-07",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "images": {
+    "binding": "IMAGES"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "jb-f1"
+    }
+  ],
+  "dev": {
+    "port": 33006,
+    "inspector_port": 33506
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "routes": [
+    {
+      "pattern": "f1.joeblau.com",
+      "custom_domain": true
+    }
+  ]
+}
